@@ -1,0 +1,27 @@
+{
+  "name": "openmew-bench",
+  "version": "0.0.1",
+  "description": "OpenMew Bench Project",
+  "main": "bin/openmew.js",
+  "bin": {
+    "openmew": "./bin/openmew.js"
+  },
+  "directories": {
+    "doc": "doc"
+  },
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://kathreon@bitbucket.org/noophyt/openmew-bench.git"
+  },
+  "keywords": [
+    "framework"
+  ],
+  "author": "Kevin de Carvalho and Francois Cadeillan",
+  "license": "Apache-2.0",
+  "homepage": "https://bitbucket.org/noophyt/openmew-bench#readme",
+  "devDependencies": {
+    "babel-eslint": "^7.2.2",
+    "eslint": "^3.19.0"
+  }
+}
