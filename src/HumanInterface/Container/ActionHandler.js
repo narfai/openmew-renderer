@@ -72,6 +72,22 @@ export class ActionHandler {
             // throw new Error('Action "' + name + '" already defined');
         this[pActions][name] = action;
     }
+
+    static craftAddModuleAction({ resource, data = {}, name = '' }){
+        return {
+            'type': 'ADD_MODULE',
+            'resource': resource,
+            'name': name,
+            'data': data
+        };
+    }
+
+    static craftRemoveModuleAction({ id }){
+        return {
+            'type': 'REMOVE_MODULE',
+            'id': id
+        };
+    }
 }
 
 export default ActionHandler;
