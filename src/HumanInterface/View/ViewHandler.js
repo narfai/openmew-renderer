@@ -14,6 +14,11 @@ export class ViewHandler {
         m.mount(element, component);
     }
     static component({ component, attributes = {}, childs = [] }){
+        if(!component) {
+            console.warn('Falsy component', component);
+            component = '';
+        }
+
         return m(component, attributes, childs);
     }
 }

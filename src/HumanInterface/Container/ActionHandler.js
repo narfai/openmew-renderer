@@ -54,7 +54,7 @@ export class ActionHandler {
             e.redraw = false;
             return handler
                 ? this.provider.dispatch(handler(e, data()))
-                : this.provider.dispatch(data());
+                : this.provider.dispatch(data(e.target));
         });
         return this;
     }
@@ -72,8 +72,12 @@ export class ActionHandler {
             // throw new Error('Action "' + name + '" already defined');
         this[pActions][name] = action;
     }
+    clear(){
+        this[pActions] = {};
+        return this;
+    }
 
-    static craftAddModuleAction({ resource, data = {}, name = '' }){
+    craftAddModuleAction({ resource, data = {}, name = '' }){
         return {
             'type': 'ADD_MODULE',
             'resource': resource,
@@ -82,7 +86,7 @@ export class ActionHandler {
         };
     }
 
-    static craftRemoveModuleAction({ id }){
+    craftRemoveModuleAction({ id }){
         return {
             'type': 'REMOVE_MODULE',
             'id': id

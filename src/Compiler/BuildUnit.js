@@ -3,10 +3,11 @@ var webpack = require('webpack'),
     gulpWebpack = require('webpack-stream'),
     debug = require('gulp-debug'),
     named = require('vinyl-named'),
-    plumber = require('gulp-plumber');
+    plumber = require('gulp-plumber'),
+    path = require('path');
 
 function BuildUnit(basePath, target){
-    this.context = basePath;
+    this.basePath = basePath;
     this.target = target;
     this.devtool = 'nosources-source-map';
     this.debug = false;
@@ -55,6 +56,11 @@ BuildUnit.prototype.generateConfiguration = function(){
         'target': this.target,
         // 'devtool': this.devtool,
         'plugins': this.generatePluginsConfiguration(),
+        'resolve': {
+            'alias': {
+                'Core': path.resolve(this.basePath, 'src')
+            }
+        },
         'module': {
             'rules': [
                 {

@@ -14,13 +14,15 @@ export class ContainerRepository {
             return null;
         return this.containers[id];
     }
+    getAll(){
+        return Object.keys(this.containers).map((key) => this.containers[key]);
+    }
     getComponent({ id }){
         let container = this.getContainer({ id });
         if(!container)
             return { 'view': ViewHandler.createDummyView() };
         return container.component;
     }
-
     getComponentByName({ name, container }){
         let { modules } = container.provider.getState();
 

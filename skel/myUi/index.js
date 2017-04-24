@@ -1,9 +1,12 @@
 import Hello from './Hello';
-import App from './App';
+import Main from './Main';
 
-export const ui = {
-    Hello,
-    App
+export const myUi = {
+  'viewset': 'myUi',
+  'views': [
+      Hello,
+      Main
+  ]
+//TODO 'stateless':
 };
 
-export default ui;

@@ -2,14 +2,34 @@ import { Blueprint } from './Blueprint';
 import { ReduceHandler } from './ReduceHandler';
 
 export class BlueprintFactory {
-    constructor({ blueprintRepository, containerRepository, containerFactory }){
-        this.blueprintRepository = blueprintRepository;
-        this.containerFactory = containerFactory;
-        this.containerRepository = containerRepository;
+    constructor(
+        {
+            blueprintRepository,
+            containerRepository,
+            viewRepository,
+            containerFactory,
+            viewSetManager
+        }){
+            this.blueprintRepository = blueprintRepository;
+            this.containerFactory = containerFactory;
+            this.containerRepository = containerRepository;
+            this.viewRepository = viewRepository;
+            this.viewSetManager = viewSetManager;
     }
     createBlueprint({ id, controller, dataReducer }){
         let reducerProvider = this.createReducerProvider({ dataReducer });
-        return new Blueprint({ id, controller, reducerProvider });
+        return new Blueprint({
+            id,
+            controller,
+            reducerProvider,
+            'viewProvider': this.createViewProvider(id),
+            'viewSetManager': this.viewSetManager
+        });
+    }
+    createViewProvider(id){
+        return () => {
+            return this.viewRepository.get(id);
+        };
     }
     createReducerProvider({ dataReducer }){
         return ({ container }) => {

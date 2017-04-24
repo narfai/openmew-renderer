@@ -20,7 +20,7 @@ export const AnchorGroup = {
                             attributes.id = module.id;
                             attributes.key = module.id;
                             return ViewHandler.component(
-                                wrapper === null
+                                wrapper !== null
                                 ? {
                                     'component': wrapper,
                                     'attributes': {'key': module.id},

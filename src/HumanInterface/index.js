@@ -7,6 +7,7 @@ import { ContainerFactory } from './Container/ContainerFactory';
 import { ContainerRepository } from './Container/ContainerRepository';
 
 import { ViewFactory } from './View/ViewFactory';
+import { ViewSetManager } from './View/ViewSetManager';
 import { ViewRepository } from './View/ViewRepository';
 
 import { StatelessRepository } from './Stateless/StatelessRepository';
@@ -15,13 +16,17 @@ import { StatelessFactory } from './Stateless/StatelessFactory';
 import { ProviderManager } from './Provider/ProviderManager';
 
 export class HumanInterface {
-    constructor({ data = {} }){
+    constructor(data){
         this.providerManager = new ProviderManager({ data });
 
+        this.viewSetManager = new ViewSetManager({ 'current': 'default '});
         this.statelessRepository = new StatelessRepository();
-        this.viewRepository = new ViewRepository();
+        this.viewRepository = new ViewRepository({
+            'viewSetManager': this.viewSetManager
+        });
         this.blueprintRepository = new BlueprintRepository();
         this.containerRepository = new ContainerRepository();
+
 
         this.viewFactory = new ViewFactory({
             'statelessRepository': this.statelessRepository
@@ -33,7 +38,6 @@ export class HumanInterface {
         });
 
         this.containerFactory = new ContainerFactory({
-            'viewRepository': this.viewRepository,
             'providerManager': this.providerManager
         });
 
@@ -41,10 +45,25 @@ export class HumanInterface {
             'blueprintRepository': this.blueprintRepository,
             'containerRepository': this.containerRepository,
             'containerFactory': this.containerFactory,
+            'viewRepository': this.viewRepository,
+            'viewSetManager': this.viewSetManager
         });
     }
-    registerView({ id, render, dataDepends, statelessDepends }){
-        let view = this.viewFactory.createView({ id, render, dataDepends, statelessDepends });
+    registerViewSet({ viewset, views}){
+        this.viewSetManager.registerViewSet({ viewset });
+        views.forEach((part) => {
+            part.viewset = viewset;
+            this.registerView(part);
+        });
+        this.viewSetManager.setCurrent({ viewset });
+    }
+    registerView({ id, render, depends, viewset }){
+        let view = this.viewFactory.createView({
+            id,
+            viewset,
+            render,
+            depends
+        });
         this.viewRepository.set(view);
     }
     registerStateless({ id, component }){
@@ -68,7 +87,12 @@ export class HumanInterface {
         let reducer = container.getReducer();
         this.providerManager.replaceReducer({ reducer });
 
-        let component = container.getComponent();
+        let component = {
+            'view': () => {
+                return ViewHandler.component({ 'component': container.getComponent() });
+            }
+        };
+
         ViewHandler.mount({ element, component });
         provider.subscribe(ViewHandler.redraw);
     }

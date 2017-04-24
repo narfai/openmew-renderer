@@ -2,22 +2,30 @@ import { ActionHandler } from './ActionHandler.js';
 
 const pProvider = Symbol('provider'),
       pReducer = Symbol('reducer'),
-      pComponent = Symbol('component');
+      pComponent = Symbol('component'),
+      pBlueprint = Symbol('blueprint');
+
 
 export class Container {
-    constructor({ id, provider, chain }){
+    constructor({ id, provider, chain, blueprint }){
         this[pProvider] = provider;
-        this[pReducer] = (state) => state;
+        this[pReducer] = blueprint.createReducer({ 'container': this });
         this[pComponent] = {};
+        this[pBlueprint] = blueprint;
         this.id = id;
         this.chain = chain;
-        this.actions = new ActionHandler({ id, provider, 'chain': this.chain });
+        this.actions = new ActionHandler({ id, provider, chain });
     }
-    setReducer(reducer){
-        this[pReducer] = reducer;
+    warmup(){
+        this[pComponent] = this[pBlueprint].createComponent({ 'container': this });
     }
-    setComponent(component){
-        this[pComponent] = component;
+    getViewSets(){
+        return this[pBlueprint].getViewSetManager().getViewSets();
+    }
+    setCurrentViewSet({ viewset }){
+        this.actions.clear();
+        this[pBlueprint].getViewSetManager().setCurrent({ viewset });
+        this.warmup();
     }
     getProvider(){
         return this[pProvider];

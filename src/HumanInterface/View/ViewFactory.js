@@ -4,13 +4,13 @@ export class ViewFactory {
     constructor({ statelessRepository }){
         this.statelessRepository = statelessRepository;
     }
-    createView({ id, render, dataDepends = [], statelessDepends = [] }){
-        let dependsProvider = this.createDependsProvider({ dataDepends });
-        let statelesses = this.getStatelessesComponents({ statelessDepends });
+    createView({ id, viewset, render, 'depends': { stateless = [], state = [] }}){
+        let statelesses = this.getStatelessesComponents({ 'statelessDepends': stateless });
         return new View({
             id,
+            viewset,
             render,
-            dependsProvider,
+            'stateDepends': state,
             statelesses
         });
     }
@@ -20,21 +20,6 @@ export class ViewFactory {
             statelesses[statelessId] = this.statelessRepository.get(statelessId).getComponent();
         });
         return statelesses;
-    }
-    createDependsProvider({ dataDepends }){
-        return ({ state }) => {
-            return ViewFactory.extractDepends(state, dataDepends);
-        };
-    }
-    static extractDepends(state, depends){
-        let viewState = {};
-        depends.forEach((depend) => {
-            if(state.hasOwnProperty(depend))
-                viewState[depend] = state[depend];
-            else if(state.data.hasOwnProperty(depend))
-                viewState[depend] = state.data[depend];
-        });
-        return viewState;
     }
 }
 
