@@ -15,6 +15,8 @@ import { StatelessFactory } from './Stateless/StatelessFactory';
 
 import { ProviderManager } from './Provider/ProviderManager';
 
+import { ReduceHandler } from './Blueprint/ReduceHandler';
+
 export class HumanInterface {
     constructor(data){
         this.providerManager = new ProviderManager({ data });
@@ -73,6 +75,16 @@ export class HumanInterface {
     registerBlueprint({ id, controller, dataReducer }){
         let blueprint = this.blueprintFactory.createBlueprint({ id, controller, dataReducer });
         this.blueprintRepository.set(blueprint);
+    }
+    subscribe(onContainerChange){
+        this.providerManager.getProvider().localSubscribe(({ id, action }) => {
+            let container = this.containerRepository.get(id);
+            if(container !== null) {
+                let state = container.getState();
+                if(ReduceHandler.allowReduce({ state, action }))
+                    onContainerChange({ container, action });
+            }
+        });
     }
     mount({ id, element }){
         let provider = this.providerManager.getProvider(),

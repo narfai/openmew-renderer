@@ -16,8 +16,11 @@ him.registerStateless(hoAnchor);
 him.registerStateless(hoAnchorGroup);
 him.registerStateless(hoNamedAnchorGroup);
 him.registerViewSet(myUi);
-him.registerViewSet(myUi2);
+// him.registerViewSet(myUi2);
 him.registerBlueprint(Hello);
 him.registerBlueprint(Main);
-
+him.subscribe(({ container, action }) => {
+    console.log('Container ' + container.getId() + ' change with state ', container.getState(), ' after ', action);
+});
 him.mount({ 'id': 'Application.Main', 'element': document.getElementById('app') });
+

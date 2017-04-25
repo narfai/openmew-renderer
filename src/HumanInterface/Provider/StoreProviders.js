@@ -6,15 +6,23 @@ export class StoreProvider {
     constructor(provider, id = ''){
         this.provider = provider;
         this.id = id;
+        this.listeners = [];
     }
     getState(){
         return this.provider.getState();
     }
+    getListeners(){
+        return this.listeners;
+    }
     dispatch(action){
         this.provider.dispatch(action);
+        this.getListeners().forEach((listen) => listen({ 'id': this.id, action }));
     }
     subscribe(listen){
         this.provider.subscribe(listen);
+    }
+    localSubscribe(listen){
+        this.listeners.push(listen);
     }
 }
 
@@ -26,8 +34,8 @@ export class SubStoreProvider extends StoreProvider {
     getState(){
         return this.select(super.getState());
     }
-    subscribe(listen){
-        return super.subscribe(listen);
+    getListeners(){
+        return this.provider.getListeners();
     }
 }
 

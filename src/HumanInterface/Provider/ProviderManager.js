@@ -6,10 +6,7 @@ let pStore = Symbol('store');
 export class ProviderManager {
     constructor({ data = {} }){
         this[pStore] = createStore((state) => state, data);
-        this.provider = new StoreProvider(this[pStore]);
-        this[pStore].subscribe(() => {
-            console.log(this[pStore].getState());
-        });
+        this.provider = new StoreProvider(this[pStore], 1);
     }
     replaceReducer({ reducer }){
         this[pStore].replaceReducer(reducer);
