@@ -1,5 +1,7 @@
 export const controller = ({ vm, container }) => {
     let inc = 0;
+    //Give values to the view
+    //Create virtual methods
     container.actions
         .clear()
         .createSelfAction('doIncrement', () => ({ 'type': 'INCREMENT' }))
@@ -11,18 +13,10 @@ export const controller = ({ vm, container }) => {
         .createSelfAction('doAddModule', () => (
             container.actions.craftAddModuleAction({
                 'resource': 'Application.Hello',
-                'data': { 'text': 'Child of #' + container.id },
+                'data': { 'text': 'Child of #' + container.id + (inc? ' #' + ++inc : '') },
                 'name': 'NewModule'
             })
-        ), (e, data) => {
-            data.data.text += (inc? inc : '');
-            inc++;
-            return data;
-        })
-        .createSelfAction('doSetActivePage', () => ({ }), (e, data) => {
-            data.name = e.target.attrs['page-name'];
-            return data;
-        });
+        ));
 };
 
 export default controller;

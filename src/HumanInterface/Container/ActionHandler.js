@@ -7,54 +7,62 @@ export class ActionHandler {
         this.provider = provider;
         this[pActions] = {};
     }
-    createSelfAction(name, data, handler = null){
+    createSelfAction(name, data){
         this.createGlobalAction(name, () => {
             let w = data();
             w.propagate = (state) => this.chain.indexOf(state.id) !== -1;
             w.reduce = (state) => state.id === this.id;
             return w;
-        }, handler);
+        });
         return this;
     }
-    createChainAction(name, data, handler = null){
+    createChainAction(name, data){
         this.createGlobalAction(name, () => {
             let w = data();
             w.propagate = (state) => this.chain.indexOf(state.id) !== -1;
             return w;
-        }, handler);
+        });
         return this;
     }
-    createParentAction(name, data, handler = null){
+    createParentAction(name, data){
         this.createGlobalAction(name, () => {
             let w = data();
             let parentId = this.chain.length > 1 ? this.chain[this.chain.length-2] : null;
             w.propagate = (state) => this.chain.indexOf(state.id) !== -1;
             w.reduce = (state) => state.id === parentId;
             return w;
-        }, handler);
+        });
         return this;
     }
-    createResourceAction(name, resource, data, handler = null){ //TODO Try it
+    createResourceAction(name, resource, data){ //TODO Try it
         this.createGlobalAction(name, () => {
             let w = data();
             w.reduce = (state) => state.resource === resource;
             return w;
-        }, handler);
+        });
+        return this;
+    }
+    createCustomAction(name, data, reduce = null, propagate = null){
+        this.createGlobalAction(name, () => {
+            let w = data();
+            if(reduce)
+                w.reduce = reduce;
+            if(propagate)
+                w.propagate = propagate;
+            return w;
+        });
         return this;
     }
 
     /**
      * @param name
-     * @param data
-     * @param handler
+     * @param creator
      * @returns {ActionHandler}
      */
-    createGlobalAction(name, data, handler = null){
+    createGlobalAction(name, creator){
         this.set(name, (e) => {
             e.redraw = false;
-            return handler
-                ? this.provider.dispatch(handler(e, data()))
-                : this.provider.dispatch(data(e.target));
+            return this.provider.dispatch(creator(e));
         });
         return this;
     }
@@ -68,8 +76,7 @@ export class ActionHandler {
     }
     set(name, action){
         if(typeof this[pActions][name] !== 'undefined')
-            console.warn('Action ' + name + ' was replaced !' );
-            // throw new Error('Action "' + name + '" already defined');
+            throw new Error('Action "' + name + '" already defined');
         this[pActions][name] = action;
     }
     clear(){

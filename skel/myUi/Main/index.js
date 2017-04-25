@@ -6,7 +6,7 @@ export const Main = {
         { prefix = '', name = 'Dummy' }, //Specific requested data
         { AnchorGroup, NamedAnchorGroup } //eslint-disable-line no-unused-vars
     ) => {
-        return (<div className="App" style="background-color: blue;">
+        return (<div className="App" style="background-color: grey;">
             <ul>
                 {
                     vm.viewSets.map((viewset) => (
@@ -14,10 +14,15 @@ export const Main = {
                     ))
                 }
             </ul>
-            <h1 style="color: green;"> UI 2 - {prefix + ' ' + name } </h1>
+            <h1 style="color: green;"> UI 1 - {prefix + ' ' + name } </h1>
             <h5>
                 <button onclick={actions.get('doAppAwesome')} type="button">Make app awesome</button>
             </h5>
+            <p>
+                <label>Module text : <input type="text" value={vm.moduleText} onchange={vm.handleModuleTextChange}/></label>
+                <label>Module name : <input type="text" value={vm.moduleName} onchange={vm.handleModuleNameChange}/></label>
+                <button onclick={actions.get('doSetNewModule2Text')} type="button">Change module text</button>
+            </p>
             <div>
                 <h2> Zone 1 </h2>
                 <NamedAnchorGroup id={id} name="CreepyWorld" optional="this is optional data injected from App" />

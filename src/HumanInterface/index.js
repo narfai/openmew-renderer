@@ -19,29 +19,32 @@ import { ReduceHandler } from './Blueprint/ReduceHandler';
 
 export class HumanInterface {
     constructor(data){
+        //TODO implement dependency injections, promise and / or events by replacing callbacks
+        //TODO prepare io interaction
+        //TODO add comment and documentation
+        //TODO maybe extract a reducerManager and a renderManager
+        //TODO find a way to more split coupling ( maybe be less flat / more hierarchic dependency tree )
+        //TODO find what we could use separately
+        //TODO enhance action system to provide system wide action collection
+        //TODO provide a way to execute some code on container initialization only
+        //TODO replace ADD_MODULE by PREPREND_MODULE and APPEND_MODULE
         this.providerManager = new ProviderManager({ data });
 
         this.viewSetManager = new ViewSetManager({ 'current': 'default '});
         this.statelessRepository = new StatelessRepository();
-        this.viewRepository = new ViewRepository({
-            'viewSetManager': this.viewSetManager
-        });
+        this.viewRepository = new ViewRepository({ 'viewSetManager': this.viewSetManager });
         this.blueprintRepository = new BlueprintRepository();
         this.containerRepository = new ContainerRepository();
 
 
-        this.viewFactory = new ViewFactory({
-            'statelessRepository': this.statelessRepository
-        });
+        this.viewFactory = new ViewFactory({ 'statelessRepository': this.statelessRepository });
 
         this.statelessFactory = new StatelessFactory({
             'containerRepository': this.containerRepository,
             'statelessRepository': this.statelessRepository
         });
 
-        this.containerFactory = new ContainerFactory({
-            'providerManager': this.providerManager
-        });
+        this.containerFactory = new ContainerFactory({ 'providerManager': this.providerManager });
 
         this.blueprintFactory = new BlueprintFactory({
             'blueprintRepository': this.blueprintRepository,
@@ -79,12 +82,15 @@ export class HumanInterface {
     subscribe(onContainerChange){
         this.providerManager.getProvider().localSubscribe(({ id, action }) => {
             let container = this.containerRepository.get(id);
-            if(container !== null) {
+            if(container !== null){
                 let state = container.getState();
                 if(ReduceHandler.allowReduce({ state, action }))
                     onContainerChange({ container, action });
             }
         });
+    }
+    setDefaultUi({ viewset }){
+        this.viewSetManager.setCurrent({ viewset });
     }
     mount({ id, element }){
         let provider = this.providerManager.getProvider(),
