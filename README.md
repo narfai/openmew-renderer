@@ -1,15 +1,7 @@
-# Procédure d'installation
+# Install
 
-* npm install openmew-bench
- 
-* ./node_modules/.bin/openmew cli build
- 
-* cp ./node_modules/openmew-bench/skel/* .
+* yarn install
 
-* nano src/Application/client.js ~ add bundle dependencies
+* yarn build
 
-* nano src/Application/server.js ~ add bundle dependencies
-
-* nano src/Application/console.js ~ add bundle dependencies
-
-
+* open skel/dist/index.html in your browser
