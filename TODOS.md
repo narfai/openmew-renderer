@@ -24,4 +24,15 @@
 
 * Allow embed-view Blueprints
 
+* add some debug tools
+
+* add tests
+
+* add webpack index.html generation
+
+* beautify example
+
+* allow action creator to be static ?
+
+* rename Blueprint.id into Blueprint.resource
 ----

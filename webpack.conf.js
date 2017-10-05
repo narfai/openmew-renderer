@@ -39,6 +39,7 @@ var path = require('path');
 
 
 module.exports = {
+    'devtool': 'inline-source-map',
     'entry': { 'app': './skel/src/index.js' },
     'resolve': { 'alias': { 'openmew-renderer': path.resolve(__dirname, 'src') } },
     'module': {
@@ -66,6 +67,9 @@ module.exports = {
     'output': {
         'path': path.resolve(__dirname, 'skel', 'dist'),
         'filename': '[name].js'
+    },
+    'watchOptions': {
+        'poll': true
     }
 };
 

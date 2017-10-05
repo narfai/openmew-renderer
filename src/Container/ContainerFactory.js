@@ -7,11 +7,11 @@
  */
 
 import { Container } from './Container';
+import { SubStoreProvider } from './../StoreProviders';
 
 export class ContainerFactory {
-    constructor({ providerManager }){
+    constructor(){
         this.id = 0;
-        this.providerManager = providerManager;
     }
     createContainer({ blueprint, provider, chain = [], id }){
         id = id || ++this.id;
@@ -27,13 +27,20 @@ export class ContainerFactory {
     }
     createSubContainer({ blueprint, parent }){
         let id = ++this.id;
-        let provider = this.providerManager.createSubProvider({
+        let provider = this.createSubProvider({
             id,
             'parent': parent.getProvider(),
             'key': 'modules',
             'discriminator': 'id'
         });
         return this.createContainer({ blueprint, provider, 'chain': parent.getChain(), id });
+    }
+    createSubProvider({ id, parent, key, discriminator }){
+        return new SubStoreProvider(
+            parent,
+            (s) => s[key].find(({ [discriminator]: stateId }) => stateId === id),
+            id
+        );
     }
 
 }

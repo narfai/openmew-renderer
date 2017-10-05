@@ -18,6 +18,7 @@
   },
   "scripts": {
     "build": "webpack --config=./webpack.conf.js --display-error-details --verbose",
+    "watch": "webpack --watch --config=./webpack.conf.js",
     "lint": "eslint src"
   },
   "dependencies": {

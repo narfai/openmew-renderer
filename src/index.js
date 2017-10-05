@@ -6,6 +6,9 @@
  Copyright (C) 2017 François Cadeillan <francois@azsystem.fr>
  */
 
+import { createStore, applyMiddleware } from 'redux';
+import { StoreProvider } from './StoreProviders';
+
 import { ViewHandler } from './View/ViewHandler';
 
 import { BlueprintFactory } from './Blueprint/BlueprintFactory';
@@ -20,10 +23,7 @@ import { ViewRepository } from './View/ViewRepository';
 
 import { StatelessRepository } from './Stateless/StatelessRepository';
 import { StatelessFactory } from './Stateless/StatelessFactory';
-
-import { ProviderManager } from './Provider/ProviderManager';
-
-import { ReduceHandler } from './Blueprint/ReduceHandler';
+import { ActionListener } from './Container/ActionListener';
 
 export class HumanInterface {
     constructor(data){
@@ -36,13 +36,20 @@ export class HumanInterface {
         //TODO enhance action system to provide system wide action collection
         //TODO provide a way to execute some code on container initialization only
         //TODO replace ADD_MODULE by PREPREND_MODULE and APPEND_MODULE
-        this.providerManager = new ProviderManager({ data });
+
+
 
         this.viewSetManager = new ViewSetManager({ 'current': 'default '});
         this.statelessRepository = new StatelessRepository();
         this.viewRepository = new ViewRepository({ 'viewSetManager': this.viewSetManager });
         this.blueprintRepository = new BlueprintRepository();
         this.containerRepository = new ContainerRepository();
+
+        this.actionListener = new ActionListener({ 'containerRepository': this.containerRepository });
+        this.store = createStore((state) => state, data, applyMiddleware(() => (next) => (action) => {
+            this.actionListener.notify({ action });
+            next(action);
+        }));
 
 
         this.viewFactory = new ViewFactory({ 'statelessRepository': this.statelessRepository });
@@ -52,7 +59,7 @@ export class HumanInterface {
             'statelessRepository': this.statelessRepository
         });
 
-        this.containerFactory = new ContainerFactory({ 'providerManager': this.providerManager });
+        this.containerFactory = new ContainerFactory();
 
         this.blueprintFactory = new BlueprintFactory({
             'blueprintRepository': this.blueprintRepository,
@@ -61,6 +68,7 @@ export class HumanInterface {
             'viewRepository': this.viewRepository,
             'viewSetManager': this.viewSetManager
         });
+
     }
     registerViewSet({ viewset, views}){
         this.viewSetManager.registerViewSet({ viewset });
@@ -88,36 +96,27 @@ export class HumanInterface {
         this.blueprintRepository.set(blueprint);
     }
     subscribe(onContainerChange){
-        this.providerManager.getProvider().localSubscribe(({ id, action }) => {
-            let container = this.containerRepository.get(id);
-            if(container !== null){
-                let state = container.getState();
-                if(ReduceHandler.allowReduce({ state, action }))
-                    onContainerChange({ container, action });
-            }
-        });
+        this.actionListener.addListener(onContainerChange);
     }
     setDefaultUi({ viewset }){
         this.viewSetManager.setCurrent({ viewset });
     }
-    mount({ id, element }){
-        let provider = this.providerManager.getProvider(),
-            blueprint = this.blueprintRepository.get(id),
+    mount({ resource, element }){
+        let blueprint = this.blueprintRepository.get(resource),
             view = this.viewRepository.get(blueprint.getId());
+
+        let provider = new StoreProvider(this.store, 1);
         let container = this.containerFactory.createContainer({
             blueprint,
             provider,
             view
         });
-        this.containerRepository.set(container);
-        let reducer = container.getReducer();
-        this.providerManager.replaceReducer({ reducer });
 
-        let component = {
-            'view': () => {
-                return ViewHandler.component({ 'component': container.getComponent() });
-            }
-        };
+        this.containerRepository.set(container);
+
+        this.store.replaceReducer(container.getReducer());
+
+        let component = { 'view': () => ViewHandler.component({ 'component': container.getComponent() }) };
 
         ViewHandler.mount({ element, component });
         provider.subscribe(ViewHandler.redraw);

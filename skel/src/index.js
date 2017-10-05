@@ -37,5 +37,8 @@ him.registerBlueprint(Main);
 him.subscribe(({ container, action }) => {
     console.log('Container ' + container.getId() + ' change with state ', container.getState(), ' after ', action);
 });
-him.mount({ 'id': 'Application.Main', 'element': document.getElementById('app') });
+him.mount({
+    'resource': 'Application.Main',
+    'element': document.getElementById('app'),
+});
 

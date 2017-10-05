@@ -69,7 +69,9 @@ export class ActionHandler {
     createGlobalAction(name, creator){
         this.set(name, (e) => {
             e.redraw = false;
-            return this.provider.dispatch(creator(e));
+            let action = creator(e);
+            action.id = this.id;
+            return this.provider.dispatch(action);
         });
         return this;
     }
