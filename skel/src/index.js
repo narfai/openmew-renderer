@@ -1,44 +1,100 @@
-/*DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
- Version 2, December 2004
-
- Copyright (C) 2017 Francois Cadeillan <francois@azsystem.fr>
-
- Everyone is permitted to copy and distribute verbatim or modified
- copies of this license document, and changing it is allowed as long
- as the name is changed.
-
- DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
- TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
-
- 0. You just DO WHAT THE FUCK YOU WANT TO.
- */
-
-import { HumanInterface } from 'openmew-renderer';
-import { Anchor as hoAnchor } from 'openmew-renderer/Stateless/Common/Anchor';
-import { AnchorGroup as hoAnchorGroup } from 'openmew-renderer/Stateless/Common/AnchorGroup';
-import { NamedAnchorGroup as hoNamedAnchorGroup } from 'openmew-renderer/Stateless/Common/NamedAnchorGroup';
-
-import { Hello } from './Hello';
-import { Main } from './Main';
-
-import { myUi } from './myUi';
-import { myUi2 } from './myUi2';
-
+import { createStore, applyMiddleware } from 'redux';
 import { mock } from './mock';
+import { StateRenderer } from 'openmew-renderer';
+import m from 'mithril';
 
-let him = new HumanInterface(mock);
-him.registerStateless(hoAnchor);
-him.registerStateless(hoAnchorGroup);
-him.registerStateless(hoNamedAnchorGroup);
-him.registerViewSet(myUi);
-him.registerViewSet(myUi2);
-him.registerBlueprint(Hello);
-him.registerBlueprint(Main);
-him.subscribe(({ container, action }) => {
-    console.log('Container ' + container.getId() + ' change with state ', container.getState(), ' after ', action);
-});
-him.mount({
+
+export const Main = {
     'resource': 'Application.Main',
-    'element': document.getElementById('app'),
+    'reducer': (state = {'prefix': '', 'name': ''}, action) => {
+        switch (action.type){
+            case 'AWESOME':
+                return {
+                    'prefix': state.prefix + ' awesome ',
+                    'name': state.name
+                };
+            default:
+                return state;
+        }
+    },
+    'view': ({ prefix, name, 'blueprints': { AnchorGroup, NamedAnchorGroup }, container }) =>
+        <div className="App" style="background-color: grey;">
+            <h1 style="color: green;"> UI 1 - {prefix + ' ' + name } </h1>
+            <div>
+                <h2> Zone 1 </h2>
+                <NamedAnchorGroup id={container.id} name="CreepyWorld" optional="this is optional data injected from App" />
+            </div>
+            <div>
+                <h2> Zone 2 </h2>
+                <AnchorGroup id={container.id} filterFn={(c) => c.store.getState().name !== 'CreepyWorld'} wrapper="li"/>
+            </div>
+        </div>
+};
+
+export const Hello = {
+    'resource': 'Application.Hello',
+    'reducer': (state = { 'number': 0, 'text': '' }, action) => {
+        switch (action.type){
+            case 'INCREMENT':
+                return {
+                    'text': state.text,
+                    'number': state.number? ++state.number : 1
+                };
+            case 'SET_MODULE_TEXT':
+                return {
+                    'text': action.text,
+                    'number': state.number
+                };
+            default:
+                return state;
+        }
+    },
+    'view': ({ name, text, number, container, 'blueprints': { AnchorGroup } }) => (
+        <div className="Hello">
+            Hello { name } { text } #{number}
+            <ul>
+                <AnchorGroup id={container.id} wrapper="li" />
+            </ul>
+        </div>
+    )
+};
+
+let store = createStore(
+    (state) => state,
+    mock,
+    applyMiddleware.apply(null, StateRenderer.middlewares()),
+);
+
+store.dispatch({
+    'type': 'REGISTER_BLUEPRINT',
+    'resource': Hello.resource,
+    'blueprint': Hello
 });
 
+store.dispatch({
+    'type': 'REGISTER_BLUEPRINT',
+    'resource': Main.resource,
+    'blueprint': Main
+});
+
+store.dispatch({
+    'type': 'CONNECT',
+    'resource': Main.resource,
+    'onConnect': ({ container }) => {
+        store.replaceReducer(container.reduce);
+        m.render(document.getElementById('app'), m(container.component));
+    }
+});
+
+// StateRenderer.reduce);
+// console.log(store.getState());
+//
+
+
+// let rootContainer = StateRenderer.connect({ store });
+
+
+//
+// store.subscribe(() => {
+//     console.log('state', store.getState());
+// });

@@ -14,40 +14,46 @@
  */
 
 export const mock = {
+    'id': 1,
     'name': 'MyApplication',
     'resource': 'Application.Main',
     'data': {
         'prefix': 'My',
         'name': 'application test'
     },
-    'modules': [
+    'containers': [
         {
+            'id': 2,
             'name': 'CandyWorld',
             'resource': 'Application.Hello',
             'data': {
                 'text': 'CandyWorld',
                 'number': 666
             },
-            'modules': [
+            'containers': [
                 {
+                    'id': 3,
                     'name': 'CoolWorld',
                     'resource': 'Application.Hello',
                     'data': {
                         'text': 'CoolWorld',
                         'number': 777
                     },
-                    'modules': [
+                    'containers': [
                         {
+                            'id': 4,
                             'name': 'LollyWorld',
                             'resource': 'Application.Hello',
                             'data': { 'text': 'LollyWorld', 'number': 888 },
-                            'modules': [
+                            'containers': [
                                 {
+                                    'id': 5,
                                     'name': 'CookieWorld',
                                     'resource': 'Application.Hello',
                                     'data': { 'text': 'CookieWorld', 'number': 999 }
                                 },
                                 {
+                                    'id': 6,
                                     'name': 'PrettyWorld',
                                     'resource': 'Application.Hello',
                                     'data': { 'text': 'PrettyWorld', 'number': 1111 }
@@ -59,9 +65,12 @@ export const mock = {
             ]
         },
         {
+            'id': 7,
             'name': 'CreepyWorld',
             'resource': 'Application.Hello',
-            'data': { 'text': 'CreepyWorld' }
+            'data': { 'text': 'CreepyWorld', 'number': 888 }
         }
     ]
 };
+
+export default mock;

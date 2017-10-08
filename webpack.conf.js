@@ -52,6 +52,7 @@ module.exports = {
                         'options': {
                             'presets': [ 'env' ],
                             'plugins': [
+                                [ 'transform-object-rest-spread' ],
                                 [ 'transform-react-jsx', { 'pragma': 'm' } ]
                             ]
                         }
