@@ -26,7 +26,7 @@ export class Container {
         this.component = blueprint.createComponent({ container });
     }
 
-    getData(){
+    getState(){
         return this.store.getState().data;
     }
 

@@ -1,11 +1,16 @@
 import m from 'mithril';
 import { Blueprint } from './Blueprint';
+import { Spread } from './Spread';
 import { Container } from './Container';
 import { Anchor } from './Stateless/Anchor';
 import { AnchorGroup } from './Stateless/AnchorGroup';
 import { NamedAnchorGroup } from './Stateless/NamedAnchorGroup';
 
 export class StateRenderer {
+    static spread(){
+        return Spread;
+    }
+
     static register(){
         return (next) => (action) => {
             if (action.type !== 'REGISTER_BLUEPRINT'

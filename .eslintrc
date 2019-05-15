@@ -66,7 +66,7 @@
     "no-sync": "error",
     "block-spacing": "error",
     "brace-style": "error",
-    "camelcase": "error",
+    "camelcase": "off",
     "comma-dangle": "error",
     "comma-spacing": "error",
     "eol-last": "error",

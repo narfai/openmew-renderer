@@ -57,26 +57,29 @@ class ReduceFilters {
 export class Blueprint {
     constructor({
         resource,
-        reduce = null,
+        reducer = null,
         controller = null,
         view = null
     }){
         this.resource = resource;
-        this.reduce = reduce;
+        this.reducer = reducer;
         this.controller = controller;
         this.view = view;
     }
+
     createReduce({ container }){
-        let dataReduce = this.reduce;
+        let dataReducer = this.reducer;
         return (state = {'containers': [], 'data': {}}, action = null) => {
+
             let allow = ReduceFilters.allowReduce({state, action});
+            console.log('Blueprint reduce', allow);
             return {
                 'id': state.id, //tweak to give an id to root module
                 'name': state.name,
                 'view': state.view,
                 'resource': state.resource,
-                'data': allow && dataReduce
-                    ? dataReduce(state.data, action)
+                'data': allow && dataReducer
+                    ? dataReducer(state.data, action)
                     : state.data,
                 'containers': (
                         (containers) =>
@@ -96,23 +99,31 @@ export class Blueprint {
         let controller = this.controller;
         let expose = { blueprints };
         if(container)
-            expose = { ...expose, container, ...container.getData() };
+            expose = { ...expose, container };
         let component = {
             'view': view
                 ? (vnode) => view({ vnode, ...expose })
                 : () => m('#')
         };
 
-        if (controller)
-            component.oninit((vnode) => controller({ vnode, ...expose }));
+        if(controller){
+            component.oninit = function BlueprintController(initial_vnode){
+                controller.call(this, { initial_vnode, ...expose });
+                return this;
+            };
+        }
+
+        console.log('COMPONENT', component);
 
         return component;
     }
+
     static get({ resource }){
         if(typeof blueprints[resource] !== 'undefined')
             return blueprints[resource];
         return null;
     }
+
     static add({ blueprint }){
         if(typeof blueprint.resource === 'undefined')
             throw new Error('Blueprint resource\'s field is missing');
