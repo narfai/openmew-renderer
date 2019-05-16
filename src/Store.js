@@ -16,14 +16,3 @@ export class Store {
 }
 
 export default Store;
-
-
-const store = new Store(store_redux, ({ toto }) => {
-    return toto.tata;
-});
-
-const store = new Store(store_redux, (tata) => {
-    return tata.titi;
-});
-
-store.getState(); //toto.tata.titi

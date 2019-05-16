@@ -47,22 +47,28 @@ store.dispatch(ActionCreator.REGISTER_BLUEPRINT({
                 return state;
         }
     },
-    'view': ({ container }) => {
+    'view': ({ container, registry }) => () => {
         const { prefix, name } = container.consumer_data();
         return <div className="App" style="background-color: grey;">
             <h1 style="color: green;"> UI 1 - {prefix + ' ' + name} </h1>
             <div>
                 <h2> Zone 1 </h2>
-                <NamedAnchorGroup id={container.id}
-                                  name_key="text"
-                                  name="CreepyWorld"
-                                  optional="this is optional data injected from App"
+                <NamedAnchorGroup
+                    id={container.id}
+                    registry={registry}
+                    name_key="text"
+                    name="CreepyWorld"
+                    optional="this is optional data injected from App"
                 />
             </div>
             <div>
                 <h2> Zone 2 </h2>
-                <AnchorGroup id={container.id} filterFn={(c) => c.store.getState().name !== 'CreepyWorld'}
-                             wrapper="li"/>
+                <AnchorGroup
+                    id={container.id}
+                    registry={registry}
+                    filterFn={(c) => c.store.getState().name !== 'CreepyWorld'}
+                    wrapper="li"
+                />
             </div>
         </div>;
     }
@@ -94,17 +100,19 @@ store.dispatch(ActionCreator.REGISTER_BLUEPRINT({
                 return state;
         }
     },
-    'view': ({ vnode, container }) =>
-        (({ name, text, number }) =>
-            <div className="Hello">
+    'view': ({ container, registry }) => (vnode) => {
+        const { name, text, number } = container.consumer_data();
+        return <div className="Hello">
                 Hello {name} {text} #{number}
                 <button onclick={vnode.state.dispatch.doIncrement} type="button">Increment self {container.id}</button>
                 <button onclick={vnode.state.dispatch.doIncrementChain} type="button">Increment bubble</button>
                 <button onclick={vnode.state.dispatch.doIncrementAll} type="button">Increment all</button>
                 <ul>
-                    <AnchorGroup id={container.id} wrapper="li"/>
+                    <AnchorGroup registry={registry} id={container.id} wrapper="li"/>
                 </ul>
-            </div>)(container.getState())
+            </div>
+        ;
+    }
 }));
 
 store.dispatch(ActionCreator.CONNECT({
@@ -112,7 +120,9 @@ store.dispatch(ActionCreator.CONNECT({
     'resource': 'Application.Main',
     'customer_data': {'prefix': 'MOUHAHAHHA...', 'name': '...HAHAHAHAHAHAHAHAHA'},
     'render': ({ container }) => {
-        m.render(document.getElementById('app'), m(container.component));
+        console.log('cointainer');
+        store.replaceReducer((state, action) => container.reducer(state, action));
+        store.subscribe(() => m.render(document.getElementById('app'), m(container.component)));
     }
 }));
 
