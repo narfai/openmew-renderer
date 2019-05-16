@@ -74,7 +74,7 @@ export class Blueprint {
             let allow = ReduceFilters.allowReduce({state, action});
             console.log('Blueprint reduce', allow);
             return {
-                'id': state.id, //tweak to give an id to root module
+                'id': state.id, //TODO generate an uniqid here
                 'name': state.name,
                 'view': state.view,
                 'resource': state.resource,

@@ -14,12 +14,11 @@ export class Container {
             'select':
                 this.chain.length === 1
                     ? null
-                    : (state) => {
-                        console.log('select', state, this.id);
-                        return (typeof state.containers !== 'undefined')
+                    : (state) => (
+                        (typeof state.containers !== 'undefined')
                             ? state.containers.find(({ 'id': stateId }) => stateId === this.id)
-                            : state;
-                    }
+                            : state
+                    )
         });
 
         this.reduce = blueprint.createReduce({ container });

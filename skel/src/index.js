@@ -1,10 +1,40 @@
 import { createStore, applyMiddleware } from 'redux';
 import { mock } from './mock';
-import { StateRenderer } from 'openmew-renderer';
 import m from 'mithril';
 
+import {
+    Registry,
+    ActionCreator,
+    Anchor,
+    AnchorGroup,
+    NamedAnchorGroup,
+    SpreadAction,
+    register_middleware,
+    connect_middleware
+} from 'openmew-renderer';
 
-export const Main = {
+const registry = new Registry();
+
+const store = createStore(
+    (state) => state,
+    mock,
+    applyMiddleware(
+        register_middleware(registry),
+        connect_middleware(registry)
+    )
+);
+
+store.subscribe(() => {
+    console.log('STATE', store.getState());
+    // m.redraw();
+});
+
+///May its just useless to register stateless ... it could be use directly
+// store.dispatch(ActionCreator.REGISTER_BLUEPRINT(Anchor));
+// store.dispatch(ActionCreator.REGISTER_BLUEPRINT(AnchorGroup));
+// store.dispatch(ActionCreator.REGISTER_BLUEPRINT(AnchorNamedAnchor));
+
+store.dispatch(ActionCreator.REGISTER_BLUEPRINT({
     'resource': 'Application.Main',
     'reducer': (state = {'prefix': '', 'name': ''}, action) => {
         switch (action.type){
@@ -17,14 +47,17 @@ export const Main = {
                 return state;
         }
     },
-    'view': ({ 'blueprints': { AnchorGroup, NamedAnchorGroup }, container }) => {
-        let { prefix, name } = container.getState();
+    'view': ({ container }) => {
+        const { prefix, name } = container.consumer_data();
         return <div className="App" style="background-color: grey;">
             <h1 style="color: green;"> UI 1 - {prefix + ' ' + name} </h1>
             <div>
                 <h2> Zone 1 </h2>
-                <NamedAnchorGroup id={container.id} name="CreepyWorld"
-                                  optional="this is optional data injected from App"/>
+                <NamedAnchorGroup id={container.id}
+                                  name_key="text"
+                                  name="CreepyWorld"
+                                  optional="this is optional data injected from App"
+                />
             </div>
             <div>
                 <h2> Zone 2 </h2>
@@ -33,15 +66,15 @@ export const Main = {
             </div>
         </div>;
     }
-};
+}));
 
-export const Hello = {
+store.dispatch(ActionCreator.REGISTER_BLUEPRINT({
     'resource': 'Application.Hello',
     'controller': function HelloController({ container }){
-        this.dispatcher = {
-            'doIncrement': StateRenderer.spread().self_scope(container, () => ({ 'type': 'INCREMENT' })),
-            'doIncrementChain': StateRenderer.spread().chain_scope(container, () => ({ 'type': 'INCREMENT' })),
-            'doIncrementAll': StateRenderer.spread().global_scope(container, () => ({ 'type': 'INCREMENT' }))
+        this.dispatch = {
+            'doIncrement': SpreadAction.self_scope(container, () => ({ 'type': 'INCREMENT' })),
+            'doIncrementChain': SpreadAction.chain_scope(container, () => ({ 'type': 'INCREMENT' })),
+            'doIncrementAll': SpreadAction.global_scope(container, () => ({ 'type': 'INCREMENT' }))
         };
     },
     'reducer': (state = { 'number': 0, 'text': '' }, action) => {
@@ -61,70 +94,54 @@ export const Hello = {
                 return state;
         }
     },
-    'view': ({ 'vnode': { 'state': { dispatcher } }, container, 'blueprints': { AnchorGroup } }) => {
-        let { name, text, number } = container.getState();
-        return <div className="Hello">
-            Hello {name} {text} #{number}
-            <button onclick={dispatcher.doIncrement} type="button">Increment self {container.id}</button>
-            <button onclick={dispatcher.doIncrementChain} type="button">Increment bubble</button>
-            <button onclick={dispatcher.doIncrementAll} type="button">Increment all</button>
-            <ul>
-                <AnchorGroup id={container.id} wrapper="li"/>
-            </ul>
-        </div>;
-    }
-};
+    'view': ({ vnode, container }) =>
+        (({ name, text, number }) =>
+            <div className="Hello">
+                Hello {name} {text} #{number}
+                <button onclick={vnode.state.dispatch.doIncrement} type="button">Increment self {container.id}</button>
+                <button onclick={vnode.state.dispatch.doIncrementChain} type="button">Increment bubble</button>
+                <button onclick={vnode.state.dispatch.doIncrementAll} type="button">Increment all</button>
+                <ul>
+                    <AnchorGroup id={container.id} wrapper="li"/>
+                </ul>
+            </div>)(container.getState())
+}));
 
-let store = createStore(
-    (state) => state,
-    mock,
-    applyMiddleware.apply(null, StateRenderer.middlewares()),
-);
-
-// store.subscribe(() => {
-//     console.log('STATE', store.getState());
-//     // m.redraw();
-// });
-
-console.log(store.getState());
-
-store.dispatch({
-    'type': 'REGISTER_BLUEPRINT',
-    'resource': Hello.resource,
-    'blueprint': Hello
-});
-
-store.dispatch({
-    'type': 'REGISTER_BLUEPRINT',
-    'resource': Main.resource,
-    'blueprint': Main
-});
-
-store.dispatch({
-    'type': 'CONNECT',
-    'resource': Main.resource,
-    'onConnect': ({ container }) => {
-        console.log('connect');
-        store.replaceReducer(container.reduce);
-        store.subscribe(() => {
-            m.render(document.getElementById('app'), m(container.component));
-            console.log('STATE', store.getState());
-            // m.redraw();
-        });
+store.dispatch(ActionCreator.CONNECT({
+    'id': 1,
+    'resource': 'Application.Main',
+    'customer_data': {'prefix': 'MOUHAHAHHA...', 'name': '...HAHAHAHAHAHAHAHAHA'},
+    'render': ({ container }) => {
         m.render(document.getElementById('app'), m(container.component));
     }
-});
+}));
 
 
-// StateRenderer.reduce);
 // console.log(store.getState());
 //
-
-
-// let rootContainer = StateRenderer.connect({ store });
-
-
-//
-// store.subscribe(() => {
-//     console.log('state', store.getState());
+// store.dispatch({
+//     'type': 'REGISTER_BLUEPRINT',
+//     'resource': Hello.resource,
+//     'blueprint': Hello
 // });
+//
+// store.dispatch({
+//     'type': 'REGISTER_BLUEPRINT',
+//     'resource': Main.resource,
+//     'blueprint': Main
+// });
+//
+// store.dispatch({
+//     'type': 'CONNECT',
+//     'resource': Main.resource,
+//     'onConnect': ({ container }) => {
+//         console.log('connect');
+//         store.replaceReducer(container.reduce);
+//         store.subscribe(() => {
+//             console.log('STATE', store.getState());
+//             // m.redraw();
+//         });
+//         m.render(document.getElementById('app'), m(container.component));
+//     }
+// });
+
