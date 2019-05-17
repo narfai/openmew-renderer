@@ -2,8 +2,8 @@ import { Store } from './Store';
 import m from 'mithril';
 
 const REGISTER_TYPE = 'REGISTER';
-const CONNECT_TYPE = 'CONNECT';
-const PUSH_TYPE = 'PUSH';
+const ATTACH_TYPE = 'ATTACH';
+const DETACH_TYPE = 'DETACH';
 
 export const Anchor = {
     'view': (vnode) => {
@@ -127,14 +127,21 @@ export class ActionCreator {
         };
     }
 
-    static CONNECT({ id, resource, consumer_data, parent_id = null, render = null }){
+    static ATTACH({ id, resource, consumer_data, parent_id = null, render = null }){
         return {
-            'type': CONNECT_TYPE,
+            'type': ATTACH_TYPE,
             id,
             resource,
             consumer_data,
             parent_id,
             render
+        };
+    }
+
+    static DETACH({ id }){
+        return {
+            'type': DETACH_TYPE,
+            id
         };
     }
 }
@@ -156,7 +163,7 @@ export class Registry {
         };
     }
 
-    connect({ store, id, resource, parent_id = null }){
+    attach({ store, id, resource, parent_id = null }){
         if(typeof this.blueprints[resource] === 'undefined')
             throw new Error('Unregistered resource ' + resource);
 
@@ -190,6 +197,11 @@ export class Registry {
         return container;
     }
 
+    detach({ id }){
+        if(typeof this.containers[id] !== 'undefined')
+            delete this.containers[id]
+    }
+
     get(id){
         if(typeof this.containers[id] === 'undefined')
             return null;
@@ -198,7 +210,7 @@ export class Registry {
 
     get_or_fail(id){
         return this.get(id) || (() => {
-            throw new Error('Unconnected container #' + id);
+            throw new Error('Detached container #' + id);
         })();
     }
 }
@@ -209,7 +221,6 @@ export class Container {
         this.id = id;
         this.resource = resource;
         this.chain = [...chain, id];
-        console.log('FROM STORE', from_store);
         this.store = new Store({
             'store': from_store,
             'select':
@@ -269,7 +280,7 @@ export class Container {
                         )
                 )(
                     allow === true
-                    ? Container.internal_reducer({'state': state.containers, action, container})
+                    ? Container.internal_reducer({'state': state.containers, action })
                     : state.containers
                 )
             };
@@ -286,7 +297,7 @@ export class Container {
 
     static internal_reducer({ state = [], action }){
         switch (action.type){
-            case 'CONNECT':
+            case 'ATTACH':
                 if(action.parent_id === null) {
                     return state;
                 }
@@ -299,6 +310,8 @@ export class Container {
                         'containers': []
                     }
                 ];
+            case 'DETACH':
+                return state.filter(({ id }) => id !== action.id);
             default:
                 return state;
         }
@@ -318,21 +331,21 @@ export const register_middleware = (registry) => (store) => (next) => (action) =
 };
 
 //TODO unregister
-export const connect_middleware = (registry) => (store) => (next) => (action) => {
-    if (action.type !== CONNECT_TYPE)
+export const attach_middleware = (registry) => (store) => (next) => (action) => {
+    if (action.type !== ATTACH_TYPE)
         return next(action);
 
     if(typeof action.store === 'undefined')
         action.store = store;
 
-    const container = registry.connect(action);
+    const container = registry.attach(action);
     console.log('ACTION', action);
     if(container !== null){
         const state = container.store.getState();
 
         if(state && typeof state.containers !== 'undefined'){
             state.containers.forEach(({id, resource, consumer_data}) => store.dispatch(
-                ActionCreator.CONNECT({
+                ActionCreator.ATTACH({
                     id,
                     resource,
                     consumer_data,
@@ -346,14 +359,21 @@ export const connect_middleware = (registry) => (store) => (next) => (action) =>
     if (action.render)
         action.render({container});
     delete action.render;
+    delete action.store;
 
     // delete action.store;
     return next(action);
 };
 
-// export const push_middleware = (registry) => (store) => (next) => (action) => {
-//     if (action.type !== CONNECT_TYPE)
-//         return next(action);
-//
-//     return registry.connect(action);
-// };
+export const detach_middleware = (registry) => (store) => (next) => (action) => {
+    if (action.type !== DETACH_TYPE)
+        return next(action);
+
+    const container = registry.get(action.id);
+    if(container !== null){
+        console.log('detach');
+        registry.detach({ 'id': container.id });
+    }
+
+    return registry.connect(action);
+};

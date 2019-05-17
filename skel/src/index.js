@@ -10,7 +10,7 @@ import {
     NamedAnchorGroup,
     SpreadAction,
     register_middleware,
-    connect_middleware
+    attach_middleware
 } from 'openmew-renderer';
 
 const registry = new Registry();
@@ -20,7 +20,7 @@ const store = createStore(
     mock,
     applyMiddleware(
         register_middleware(registry),
-        connect_middleware(registry)
+        attach_middleware(registry)
     )
 );
 
@@ -82,7 +82,7 @@ store.dispatch(ActionCreator.REGISTER_BLUEPRINT({
             'doIncrement': SpreadAction.self_scope(container, () => ({ 'type': 'INCREMENT' })),
             'doIncrementChain': SpreadAction.chain_scope(container, () => ({ 'type': 'INCREMENT' })),
             'doIncrementAll': SpreadAction.global_scope(container, () => ({ 'type': 'INCREMENT' })),
-            'addNewModule': SpreadAction.self_scope(container, () => (ActionCreator.CONNECT({
+            'addNewModule': SpreadAction.self_scope(container, () => (ActionCreator.ATTACH({
                 'id': ++uniq_id,
                 'resource': 'Application.Hello',
                 'parent_id': container.id,
@@ -90,6 +90,9 @@ store.dispatch(ActionCreator.REGISTER_BLUEPRINT({
                 'render': ({ container }) => {
                     console.log('render of submodule', container);
                 }
+            }))),
+            'deleteMe': SpreadAction.parent_scope(container, () => (ActionCreator.DETACH({
+                'id': container.id
             })))
         };
     },
@@ -117,7 +120,8 @@ store.dispatch(ActionCreator.REGISTER_BLUEPRINT({
                 <button onclick={vnode.state.dispatch.doIncrement} type="button">Increment self {container.id}</button>
                 <button onclick={vnode.state.dispatch.doIncrementChain} type="button">Increment bubble</button>
                 <button onclick={vnode.state.dispatch.doIncrementAll} type="button">Increment all</button>
-                <button onclick={vnode.state.dispatch.addNewModule} type="button">Add new module</button>
+                <button onclick={vnode.state.dispatch.addNewModule} type="button">Attach new</button>
+                <button onclick={vnode.state.dispatch.deleteMe} type="button">Detach me</button>
                 <ul>
                     <AnchorGroup registry={registry} id={container.id} wrapper="li"/>
                 </ul>
@@ -126,7 +130,7 @@ store.dispatch(ActionCreator.REGISTER_BLUEPRINT({
     }
 }));
 
-store.dispatch(ActionCreator.CONNECT({
+store.dispatch(ActionCreator.ATTACH({
     'id': 1,
     'resource': 'Application.Main',
     'render': ({ container }) => {
