@@ -3,6 +3,7 @@ import m from 'mithril';
 
 const REGISTER_TYPE = 'REGISTER';
 const CONNECT_TYPE = 'CONNECT';
+const PUSH_TYPE = 'PUSH';
 
 export const Anchor = {
     'view': (vnode) => {
@@ -43,14 +44,15 @@ export const AnchorGroup = {
 };
 
 export const NamedAnchorGroup = {
-    'view': ({ 'attrs': { name_key, ...attrs } }) => {
+    'view': ({ 'attrs': { name_key, name, ...attrs } }) => {
         let attributes = Object.assign(
             {
                 'filterFn': (container) => {
                     let consumer_data = container.consumer_data();
-                    return !(typeof consumer_data[name_key] !== 'undefined'
-                        && typeof attrs[name_key] !== 'undefined'
-                        && consumer_data[name_key] === attrs[name_key]);
+                    return !(typeof consumer_data[name_key] === 'undefined'
+                        || typeof name_key === 'undefined'
+                        || typeof name === 'undefined'
+                        || consumer_data[name_key] !== name);
                 }
             },
             attrs
@@ -104,11 +106,11 @@ export class SpreadAction {
     }
 
     static global_scope(container, creator){
-        return (e) => {
+        return (e = {}) => {
             e.redraw = false;
             const action = creator(e);
-            action.id = container.id;
-            container.store.dispatch(action);
+            action.container_id = container.id;
+            e.dispatch_result = container.store.dispatch(action);
             return e;
         };
     }
@@ -125,14 +127,14 @@ export class ActionCreator {
         };
     }
 
-    static CONNECT({ id, resource, consumer_data = {}, parent_id = null, render = null }){
+    static CONNECT({ id, resource, consumer_data, parent_id = null, render = null }){
         return {
             'type': CONNECT_TYPE,
             id,
             resource,
+            consumer_data,
             parent_id,
-            render,
-            consumer_data
+            render
         };
     }
 }
@@ -178,6 +180,7 @@ export class Registry {
         const container = new Container({
             id,
             from_store,
+            resource,
             'component_creator': Container.component_creator({ 'registry': this, view, controller }),
             'reducer_creator': Container.reducer_creator({ 'registry': this, reducer }),
             chain
@@ -202,10 +205,11 @@ export class Registry {
 
 
 export class Container {
-    constructor({ id, from_store, component_creator, reducer_creator, chain = []}){
+    constructor({ id, from_store, resource, component_creator, reducer_creator, chain = []}){
         this.id = id;
+        this.resource = resource;
         this.chain = [...chain, id];
-        console.log('container', this.chain, from_store.getState());
+        console.log('FROM STORE', from_store);
         this.store = new Store({
             'store': from_store,
             'select':
@@ -227,17 +231,17 @@ export class Container {
         return this.store.getState().consumer_data;
     }
 
-    static component_creator({ registry, view, controller }){
+    static component_creator({ registry, view = null, controller = null }){
         return (container) => {
-            let expose = { registry };
-            if(container) expose = { ...expose, container };
+            const expose = { registry, container };
+
             const component = {
-                'view': view
+                'view': view !== null
                     ? view(expose)
                     : () => m('#')
             };
 
-            if(controller){
+            if(controller !== null){
                 component.oninit = function BlueprintController(initial_vnode){
                     controller.call(this, { initial_vnode, ...expose });
                     return this;
@@ -250,24 +254,21 @@ export class Container {
     static reducer_creator({ registry, reducer }){
         return (container) => (state = { 'containers': [], 'consumer_data': {} }, action = null) => {
             const allow = Container.allow_reduction({state, action});
-            console.log('REDUCER CREATOR', allow);
             return {
-                'id': state.id,
-                'name': state.name,
-                'view': state.view,
-                'resource': state.resource,
-                'consumer_data': allow && container
+                'id': state.id || container.id,
+                'resource': state.resource || container.resource,
+                'consumer_data': allow === true
                     ? reducer(state.consumer_data, action)
                     : state.consumer_data,
                 'containers': (
                     (containers) =>
                         containers.map((subState) =>
-                            action.id && Container.allow_propagation({'state': subState, action})
-                                ? registry.get_or_fail(action.id).reducer(subState, action)
+                            typeof action.container_id !== 'undefined' && Container.allow_propagation({'state': subState, action}) === true
+                                ? registry.get_or_fail(action.container_id).reducer(subState, action)
                                 : subState
                         )
                 )(
-                    allow
+                    allow === true
                     ? Container.internal_reducer({'state': state.containers, action, container})
                     : state.containers
                 )
@@ -285,17 +286,19 @@ export class Container {
 
     static internal_reducer({ state = [], action }){
         switch (action.type){
-            // case 'CONNECT':
-            //     return [
-            //         ...state,
-            //         {
-            //             'id': action.id,
-            //             'consumer_data': action.consumer_data || {},
-            //             'resource': action.resource,
-            //             'containers': []
-            //         }
-            //     ];
-            // case 'UNCONNECT'://TODO
+            case 'CONNECT':
+                if(action.parent_id === null) {
+                    return state;
+                }
+                return [
+                    ...state,
+                    {
+                        'id': action.id,
+                        'consumer_data': action.consumer_data || {},
+                        'resource': action.resource,
+                        'containers': []
+                    }
+                ];
             default:
                 return state;
         }
@@ -322,13 +325,13 @@ export const connect_middleware = (registry) => (store) => (next) => (action) =>
     if(typeof action.store === 'undefined')
         action.store = store;
 
-
     const container = registry.connect(action);
-    if(container){
-        const { containers } = container.store.getState();
+    console.log('ACTION', action);
+    if(container !== null){
+        const state = container.store.getState();
 
-        if(containers){
-            containers.forEach(({id, resource, consumer_data}) => store.dispatch(
+        if(state && typeof state.containers !== 'undefined'){
+            state.containers.forEach(({id, resource, consumer_data}) => store.dispatch(
                 ActionCreator.CONNECT({
                     id,
                     resource,
@@ -338,13 +341,19 @@ export const connect_middleware = (registry) => (store) => (next) => (action) =>
                 }))
             );
         }
-
-        if (action.render)
-            action.render({container});
-        delete action.render;
     }
-    delete action.store;
+
+    if (action.render)
+        action.render({container});
+    delete action.render;
+
+    // delete action.store;
     return next(action);
 };
 
-//TODO unconnect
+// export const push_middleware = (registry) => (store) => (next) => (action) => {
+//     if (action.type !== CONNECT_TYPE)
+//         return next(action);
+//
+//     return registry.connect(action);
+// };

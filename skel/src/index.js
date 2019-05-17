@@ -57,7 +57,7 @@ store.dispatch(ActionCreator.REGISTER_BLUEPRINT({
                     id={container.id}
                     registry={registry}
                     name_key="text"
-                    name="CreepyWorld"
+                    name="CandyWorld"
                     optional="this is optional data injected from App"
                 />
             </div>
@@ -66,7 +66,7 @@ store.dispatch(ActionCreator.REGISTER_BLUEPRINT({
                 <AnchorGroup
                     id={container.id}
                     registry={registry}
-                    filterFn={(c) => c.store.getState().name !== 'CreepyWorld'}
+                    filterFn={(c) => c.consumer_data().text === 'CreepyWorld' }
                     wrapper="li"
                 />
             </div>
@@ -74,13 +74,23 @@ store.dispatch(ActionCreator.REGISTER_BLUEPRINT({
     }
 }));
 
+let uniq_id = 19;
 store.dispatch(ActionCreator.REGISTER_BLUEPRINT({
     'resource': 'Application.Hello',
     'controller': function HelloController({ container }){
         this.dispatch = {
             'doIncrement': SpreadAction.self_scope(container, () => ({ 'type': 'INCREMENT' })),
             'doIncrementChain': SpreadAction.chain_scope(container, () => ({ 'type': 'INCREMENT' })),
-            'doIncrementAll': SpreadAction.global_scope(container, () => ({ 'type': 'INCREMENT' }))
+            'doIncrementAll': SpreadAction.global_scope(container, () => ({ 'type': 'INCREMENT' })),
+            'addNewModule': SpreadAction.self_scope(container, () => (ActionCreator.CONNECT({
+                'id': ++uniq_id,
+                'resource': 'Application.Hello',
+                'parent_id': container.id,
+                'consumer_data': { 'text': 'NEW MODULE !', 'number': '6666666' },
+                'render': ({ container }) => {
+                    console.log('render of submodule', container);
+                }
+            })))
         };
     },
     'reducer': (state = { 'number': 0, 'text': '' }, action) => {
@@ -107,6 +117,7 @@ store.dispatch(ActionCreator.REGISTER_BLUEPRINT({
                 <button onclick={vnode.state.dispatch.doIncrement} type="button">Increment self {container.id}</button>
                 <button onclick={vnode.state.dispatch.doIncrementChain} type="button">Increment bubble</button>
                 <button onclick={vnode.state.dispatch.doIncrementAll} type="button">Increment all</button>
+                <button onclick={vnode.state.dispatch.addNewModule} type="button">Add new module</button>
                 <ul>
                     <AnchorGroup registry={registry} id={container.id} wrapper="li"/>
                 </ul>
@@ -118,40 +129,18 @@ store.dispatch(ActionCreator.REGISTER_BLUEPRINT({
 store.dispatch(ActionCreator.CONNECT({
     'id': 1,
     'resource': 'Application.Main',
-    'customer_data': {'prefix': 'MOUHAHAHHA...', 'name': '...HAHAHAHAHAHAHAHAHA'},
     'render': ({ container }) => {
         console.log('cointainer');
-        store.replaceReducer((state, action) => container.reducer(state, action));
-        store.subscribe(() => m.render(document.getElementById('app'), m(container.component)));
+        store.replaceReducer(container.reducer);
+        store.subscribe(() => {
+            console.log('RENDER');
+            m.render(document.getElementById('app'), m(container.component));
+        });
     }
 }));
 
+//TODO ADD / REMOVE / MOVE WIDGET
 
-// console.log(store.getState());
-//
-// store.dispatch({
-//     'type': 'REGISTER_BLUEPRINT',
-//     'resource': Hello.resource,
-//     'blueprint': Hello
-// });
-//
-// store.dispatch({
-//     'type': 'REGISTER_BLUEPRINT',
-//     'resource': Main.resource,
-//     'blueprint': Main
-// });
-//
-// store.dispatch({
-//     'type': 'CONNECT',
-//     'resource': Main.resource,
-//     'onConnect': ({ container }) => {
-//         console.log('connect');
-//         store.replaceReducer(container.reduce);
-//         store.subscribe(() => {
-//             console.log('STATE', store.getState());
-//             // m.redraw();
-//         });
-//         m.render(document.getElementById('app'), m(container.component));
-//     }
-// });
-
+//VIEWSET MIDDLEWARE => allow
+////Remove id => UNIQID => use realstore.getState().id or generate new one
+//PORTAGE / CLEANUP / LINT
