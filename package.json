@@ -11,19 +11,17 @@
     "babel-eslint": "^8.0.1",
     "babel-loader": "^7.1.2",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-plugin-transform-react-jsx": "^6.24.1",
     "babel-preset-env": "^1.6.0",
     "eslint": "^4.8.0",
     "mithril": "^1.1.4",
     "redux": "^3.7.2",
-    "webpack": "^3.6.0"
+    "webpack": "^3.6.0",
+    "uniqid": "^5.0.3"
   },
   "scripts": {
     "build": "webpack --config=./webpack.conf.js --display-error-details --verbose",
     "watch": "webpack --watch --config=./webpack.conf.js",
     "lint": "eslint src"
-  },
-  "dependencies": {
-    "babel-plugin-transform-react-jsx": "^6.24.1",
-    "uniqid": "^5.0.3"
   }
 }

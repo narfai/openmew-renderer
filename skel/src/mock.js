@@ -14,7 +14,7 @@
  */
 
 export const mock = {
-    'id': 1,
+    'id': 'jvs2qy94',
     'resource': 'Application.Main',
     'consumer_data': {
         'prefix': 'My',
@@ -22,7 +22,7 @@ export const mock = {
     },
     'containers': [
         {
-            'id': 2,
+            'id': 'jsvs2qz18',
             'resource': 'Application.Hello',
             'consumer_data': {
                 'text': 'CandyWorld',
@@ -30,7 +30,7 @@ export const mock = {
             },
             'containers': [
                 {
-                    'id': 3,
+                    'id': 'jvs2y66t',
                     'resource': 'Application.Hello',
                     'consumer_data': {
                         'text': 'CoolWorld',
@@ -38,7 +38,7 @@ export const mock = {
                     },
                     'containers': [
                         {
-                            'id': 4,
+                            'id': 'jvs2y6gi',
                             'resource': 'Application.Hello',
                             'consumer_data': {
                                 'text': 'LollyWorld',
@@ -46,7 +46,7 @@ export const mock = {
                             },
                             'containers': [
                                 {
-                                    'id': 5,
+                                    'id': 'jvs2y6y4',
                                     'resource': 'Application.Hello',
                                     'consumer_data': {
                                         'text': 'CookieWorld',
@@ -54,7 +54,7 @@ export const mock = {
                                     }
                                 },
                                 {
-                                    'id': 6,
+                                    'id': 'jvs2y724',
                                     'resource': 'Application.Hello',
                                     'consumer_data': { 'text': 'PrettyWorld', 'number': 1111 }
                                 }
@@ -65,7 +65,7 @@ export const mock = {
             ]
         },
         {
-            'id': 7,
+            'id': 'jvs2y6by',
             'name': 'CreepyWorld',
             'resource': 'Application.Hello',
             'consumer_data': { 'text': 'CreepyWorld', 'number': 888 }

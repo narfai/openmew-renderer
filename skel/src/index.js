@@ -4,13 +4,14 @@ import m from 'mithril';
 
 import {
     Registry,
-    ActionCreator,
+    Action,
     Anchor,
     AnchorGroup,
     NamedAnchorGroup,
-    SpreadAction,
+    Spread,
     register_middleware,
-    attach_middleware
+    attach_middleware,
+    detach_middleware
 } from 'openmew-renderer';
 
 const registry = new Registry();
@@ -20,21 +21,16 @@ const store = createStore(
     mock,
     applyMiddleware(
         register_middleware(registry),
-        attach_middleware(registry)
+        attach_middleware(registry),
+        detach_middleware(registry)
     )
 );
 
 store.subscribe(() => {
     console.log('STATE', store.getState());
-    // m.redraw();
 });
 
-///May its just useless to register stateless ... it could be use directly
-// store.dispatch(ActionCreator.REGISTER_BLUEPRINT(Anchor));
-// store.dispatch(ActionCreator.REGISTER_BLUEPRINT(AnchorGroup));
-// store.dispatch(ActionCreator.REGISTER_BLUEPRINT(AnchorNamedAnchor));
-
-store.dispatch(ActionCreator.REGISTER_BLUEPRINT({
+store.dispatch(Action.REGISTER_BLUEPRINT({
     'resource': 'Application.Main',
     'reducer': (state = {'prefix': '', 'name': ''}, action) => {
         switch (action.type){
@@ -66,7 +62,7 @@ store.dispatch(ActionCreator.REGISTER_BLUEPRINT({
                 <AnchorGroup
                     id={container.id}
                     registry={registry}
-                    filterFn={(c) => c.consumer_data().text === 'CreepyWorld' }
+                    // filterFn={(c) => c.consumer_data().text === 'CreepyWorld' }
                     wrapper="li"
                 />
             </div>
@@ -74,16 +70,14 @@ store.dispatch(ActionCreator.REGISTER_BLUEPRINT({
     }
 }));
 
-let uniq_id = 19;
-store.dispatch(ActionCreator.REGISTER_BLUEPRINT({
+store.dispatch(Action.REGISTER_BLUEPRINT({
     'resource': 'Application.Hello',
     'controller': function HelloController({ container }){
         this.dispatch = {
-            'doIncrement': SpreadAction.self_scope(container, () => ({ 'type': 'INCREMENT' })),
-            'doIncrementChain': SpreadAction.chain_scope(container, () => ({ 'type': 'INCREMENT' })),
-            'doIncrementAll': SpreadAction.global_scope(container, () => ({ 'type': 'INCREMENT' })),
-            'addNewModule': SpreadAction.self_scope(container, () => (ActionCreator.ATTACH({
-                'id': ++uniq_id,
+            'doIncrement': Spread.self_scope(container, () => ({ 'type': 'INCREMENT' })),
+            'doIncrementChain': Spread.chain_scope(container, () => ({ 'type': 'INCREMENT' })),
+            'doIncrementAll': Spread.global_scope(container, () => ({ 'type': 'INCREMENT' })),
+            'addNewModule': Spread.self_scope(container, () => (Action.ATTACH({
                 'resource': 'Application.Hello',
                 'parent_id': container.id,
                 'consumer_data': { 'text': 'NEW MODULE !', 'number': '6666666' },
@@ -91,7 +85,7 @@ store.dispatch(ActionCreator.REGISTER_BLUEPRINT({
                     console.log('render of submodule', container);
                 }
             }))),
-            'deleteMe': SpreadAction.parent_scope(container, () => (ActionCreator.DETACH({
+            'deleteMe': Spread.parent_scope(container, () => (Action.DETACH({
                 'id': container.id
             })))
         };
@@ -130,8 +124,7 @@ store.dispatch(ActionCreator.REGISTER_BLUEPRINT({
     }
 }));
 
-store.dispatch(ActionCreator.ATTACH({
-    'id': 1,
+store.dispatch(Action.ATTACH({
     'resource': 'Application.Main',
     'render': ({ container }) => {
         console.log('cointainer');
