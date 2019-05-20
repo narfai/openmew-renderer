@@ -16,9 +16,10 @@ export class Registry {
         this.containers = {};
     }
 
-    register({ resource, view, reducer = null, controller = null }){
+    register({ resource, view = null, reducer = null, controller = null }){
         if(typeof this.blueprints[resource] !== 'undefined')
             console.warn('Redefine ' + resource);
+
         this.blueprints[resource] = {
             resource,
             view,
@@ -46,18 +47,29 @@ export class Registry {
             };
         })();
 
-        const { view, reducer, controller } = this.blueprints[resource];
+        const { view, controller } = this.blueprints[resource];
 
         const container = new Container({
             id,
             from_store,
             'component_creator': component_creator({ 'registry': this, view, controller }),
-            'reducer_creator': reducer_creator({ 'registry': this, reducer }),
+            'reducer': reducer_creator({ 'registry': this }),
             chain
         });
 
         this.containers[container.id] = container;
         return container;
+    }
+
+    reducer(resource, state, action){
+        if(typeof this.blueprints[resource] === 'undefined')
+            throw new Error('Unregistered resource ' + resource);
+
+        const { reducer } = this.blueprints[resource];
+        if(reducer !== null){
+            return reducer(state, action);
+        }
+        return state;
     }
 
     detach({ id }){

@@ -8,20 +8,20 @@ Copyright (C) 2019 François Cadeillan <francois@azsystem.fr>
 
 import { ATTACH_TYPE, DETACH_TYPE } from './action';
 
-export function reducer_creator({ registry, reducer }){
-    return (container) => (state = { 'containers': [], 'consumer_data': {} }, action = null) => {
+export function reducer_creator({ registry }){
+    function reducer(state = { 'containers': [], 'consumer_data': {} }, action){
         const allow = allow_reduction({state, action});
         return {
             'id': state.id,
             'resource': state.resource,
             'consumer_data': allow === true
-                ? reducer(state.consumer_data, action)
+                ? registry.reducer(state.resource, state.consumer_data, action)
                 : state.consumer_data,
             'containers': (
                 (containers) =>
                     containers.map((subState) =>
                         typeof action.container_id !== 'undefined' && allow_propagation({'state': subState, action}) === true
-                            ? container.reducer(subState, action)
+                            ? reducer(subState, action)
                             : subState
                     )
             )(
@@ -30,7 +30,9 @@ export function reducer_creator({ registry, reducer }){
                     : state.containers
             )
         };
-    };
+    }
+
+    return reducer;
 }
 
 function allow_propagation({ state, action }){
