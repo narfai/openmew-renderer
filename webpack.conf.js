@@ -13,30 +13,7 @@ TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
 0. You just DO WHAT THE FUCK YOU WANT TO.
 */
 
-/**
- REMOVE GULP ! SPLIT DEVOPS !
- Many things to compile separately:
- Cli pack (target node-async)
- => include configuration parsing
- => include compiler (/!\)
-
- Client pack (target web)
- => include iso (.js) deps from Sources ( Core -> App -> whatever )
- => include client (.client.js) deps from Sources ( Core -> App )
- => does not allow server (.server.js) files
-
- UI packs (target web)
-
- Server pack (target node-async)
- => include builtin server
- => include iso (.js) deps from Sources ( Core -> App )
- => include server (.server.js) deps from Sources ( Core -> App )
- => does not allow client (.client.js) files
-
- */
-
 var path = require('path');
-
 
 module.exports = {
     'devtool': 'inline-source-map',
@@ -69,8 +46,6 @@ module.exports = {
         'path': path.resolve(__dirname, 'skel', 'dist'),
         'filename': '[name].js'
     },
-    'watchOptions': {
-        'poll': true
-    }
+    'watchOptions': { 'poll': true }
 };
 

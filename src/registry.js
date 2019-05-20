@@ -17,9 +17,6 @@ export class Registry {
     }
 
     register({ resource, view = null, reducer = null, controller = null }){
-        if(typeof this.blueprints[resource] !== 'undefined')
-            console.warn('Redefine ' + resource);
-
         this.blueprints[resource] = {
             resource,
             view,
@@ -66,9 +63,9 @@ export class Registry {
             throw new Error('Unregistered resource ' + resource);
 
         const { reducer } = this.blueprints[resource];
-        if(reducer !== null){
-            return reducer(state, action);
-        }
+
+        if(reducer !== null) return reducer(state, action);
+
         return state;
     }
 

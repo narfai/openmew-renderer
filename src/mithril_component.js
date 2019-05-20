@@ -52,7 +52,7 @@ export const AnchorGroup = {
         if(typeof state.containers === 'undefined') return m('#');
 
         return state.containers
-            .filter(({ id }) => filterFn(registry.get(id)))
+            .filter(({ 'id': sub_id }) => filterFn(registry.get(sub_id)))
             .map(({ 'id': sub_id }) => {
                     let attributes = Object.assign({}, vnode.attrs);
                     attributes.id = sub_id;

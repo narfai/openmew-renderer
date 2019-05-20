@@ -10,7 +10,7 @@ import uniqid from 'uniqid';
 
 import { Action, REGISTER_TYPE, ATTACH_TYPE, DETACH_TYPE } from './action';
 
-export const register_middleware = (registry) => (store) => (next) => (action) => {
+export const register_middleware = (registry) => () => (next) => (action) => {
     if (action.type !== REGISTER_TYPE)
         return next(action);
 
@@ -57,14 +57,13 @@ export const attach_middleware = (registry) => (store) => (next) => (action) => 
     return next(action);
 };
 
-export const detach_middleware = (registry) => (store) => (next) => (action) => {
+export const detach_middleware = (registry) => () => (next) => (action) => {
     if (action.type !== DETACH_TYPE)
         return next(action);
 
     const container = registry.get(action.id);
-    if(container !== null){
-        registry.detach({ 'id': container.id });
-    }
+
+    if(container !== null) registry.detach({ 'id': container.id });
 
     return next(action);
 };
