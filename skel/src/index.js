@@ -150,9 +150,3 @@ store.dispatch(Action.ATTACH({
         });
     }
 }));
-
-//TODO ADD / REMOVE / MOVE WIDGET
-
-//VIEWSET MIDDLEWARE => allow
-////Remove id => UNIQID => use realstore.getState().id or generate new one
-//PORTAGE / CLEANUP / LINT
