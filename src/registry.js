@@ -8,7 +8,7 @@ Copyright (C) 2019 François Cadeillan <francois@azsystem.fr>
 
 import { Container } from './container';
 import { reducer_creator } from './state/reducer';
-import { component_creator } from './component';
+import { component_creator } from './mithril_component';
 
 export class Registry {
     constructor(){
