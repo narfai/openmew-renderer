@@ -20,4 +20,8 @@ OpenMew library which is able to render Mithril/Redux based components recursive
 
 * /skel/src is the source code of example project (under DWTFYW license)
 
+## Trello
+
+https://trello.com/b/JIyri14h/openmew-renderer
+
 ----
