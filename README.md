@@ -12,13 +12,17 @@ OpenMew library which is able to render Mithril/Redux based components recursive
 
 * `yarn build`
 
-* open `skel/dist/index.html` in your browser
+* `cd example`
+
+* `yarn install`
+
+* open `example/index.html` in your browser
 
 ## Notices
 
 * /src is the source code of renderer (under MPL 2.0 license)
 
-* /skel/src is the source code of example project (under DWTFYW license)
+* /example is the source code of example project (under DWTFYW license)
 
 ## Trello
 
