@@ -2,7 +2,7 @@
   "name": "openmew-renderer",
   "version": "0.1.7",
   "description": "OpenMew library which is able to render Mithril/Redux based components recursively",
-  "main": "/dist/openmew-renderer.js",
+  "main": "dist/openmew-renderer.js",
   "repository": "https://github.com/narfai/openmew-renderer.git",
   "author": "Francois Cadeillan <francois@azsystem.fr>",
   "license": "MPL-2.0",
