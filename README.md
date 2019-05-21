@@ -4,7 +4,7 @@
 
 ## Description
 
-OpenMew library which is able to render Mithril/Redux based components recursively.
+OpenMew library which allow to render Mithril/Redux based components recursively.
 
 ## Test it !
 
@@ -17,6 +17,32 @@ OpenMew library which is able to render Mithril/Redux based components recursive
 * `yarn install`
 
 * open `example/index.html` in your browser
+
+## Docker
+
+`<command>` could be :
+
+* build : dev & production build for web et node-webkit targets
+
+* lint : check lint with eslint
+
+* watch : watch for changes & build ( must be used in live source mode)
+
+* shell : run bash shell
+
+* yarn : perform yarn commands
+
+
+### Embedded sources
+
+`docker build -t omr .`
+
+`docker run --rm -ti -v $(pwd)/dist:/usr/src/openmew-renderer/dist omr <command>`
+
+### Live sources
+
+`docker run --rm -ti -v $(pwd):/usr/src/openmew-renderer omr <command>`
+
 
 ## Notices
 

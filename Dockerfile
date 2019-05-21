@@ -2,8 +2,8 @@ FROM node:alpine
 
 WORKDIR /usr/src/openmew-renderer
 
-RUN apk add --no-cache yarn && yarn install --production=false && yarn build
+RUN apk add --no-cache yarn bash shadow
 
 COPY . .
 
-VOLUME "/usr/src/openmew-renderer/target"
+ENTRYPOINT ["/usr/src/openmew-renderer/entrypoint.sh"]
