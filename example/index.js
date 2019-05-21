@@ -17,7 +17,7 @@
 var mock = {
     'id': 'jvs2qy94',
     'resource': 'Application.Main',
-    'consumer_data': {
+    'consumer_state': {
         'prefix': 'My',
         'name': 'application test'
     },
@@ -25,7 +25,7 @@ var mock = {
         {
             'id': 'jsvs2qz18',
             'resource': 'Application.Hello',
-            'consumer_data': {
+            'consumer_state': {
                 'text': 'CandyWorld',
                 'number': 666
             },
@@ -33,7 +33,7 @@ var mock = {
                 {
                     'id': 'jvs2y66t',
                     'resource': 'Application.Hello',
-                    'consumer_data': {
+                    'consumer_state': {
                         'text': 'CoolWorld',
                         'number': 777
                     },
@@ -41,7 +41,7 @@ var mock = {
                         {
                             'id': 'jvs2y6gi',
                             'resource': 'Application.Hello',
-                            'consumer_data': {
+                            'consumer_state': {
                                 'text': 'LollyWorld',
                                 'number': 888
                             },
@@ -49,7 +49,7 @@ var mock = {
                                 {
                                     'id': 'jvs2y6y4',
                                     'resource': 'Application.Hello',
-                                    'consumer_data': {
+                                    'consumer_state': {
                                         'text': 'CookieWorld',
                                         'number': 999
                                     }
@@ -57,7 +57,7 @@ var mock = {
                                 {
                                     'id': 'jvs2y724',
                                     'resource': 'Application.Hello',
-                                    'consumer_data': { 'text': 'PrettyWorld', 'number': 1111 }
+                                    'consumer_state': { 'text': 'PrettyWorld', 'number': 1111 }
                                 }
                             ]
                         }
@@ -69,7 +69,7 @@ var mock = {
             'id': 'jvs2y6by',
             'name': 'CreepyWorld',
             'resource': 'Application.Hello',
-            'consumer_data': { 'text': 'CreepyWorld', 'number': 888 }
+            'consumer_state': { 'text': 'CreepyWorld', 'number': 888 }
         }
     ]
 };
@@ -78,7 +78,7 @@ var mock = {
     var registry = new OpenMewRenderer.Registry();
     var store = Redux.createStore(
         function(state){ return state },
-        {},
+        mock,
         Redux.applyMiddleware(
             OpenMewRenderer.register_middleware(registry),
             OpenMewRenderer.attach_middleware(registry),
@@ -108,7 +108,7 @@ var mock = {
         },
         'view': function(context) {
             return function(){
-                var state = context.container.consumer_data();
+                var state = context.container.consumer_state();
                 if(typeof state === 'undefined') state = {};
                 if(typeof state.prefix === 'undefined') state.prefix = '';
                 if(typeof state.name === 'undefined') state.name = '';
@@ -165,7 +165,7 @@ var mock = {
                 'addNewModule': OpenMewRenderer.Spread.self_scope(context.container, function() { return OpenMewRenderer.Action.ATTACH({
                     'resource': 'Application.Hello',
                     'parent_id': context.container.id,
-                    'consumer_data': { 'text': 'NEW MODULE !', 'number': '6666666' },
+                    'consumer_state': { 'text': 'NEW MODULE !', 'number': '6666666' },
                     'render': function(context){
                         console.log('render of submodule', context.container);
                     }
@@ -201,7 +201,7 @@ var mock = {
         },
         'view': function(context){
             return function(vnode){
-                var state = context.container.consumer_data();
+                var state = context.container.consumer_state();
                 if(typeof state === 'undefined') state = {};
                 if(typeof state.text === 'undefined') state.text = '';
                 if(typeof state.number === 'undefined') state.number = '';

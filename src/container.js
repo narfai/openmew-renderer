@@ -30,7 +30,7 @@ export class Container {
         this.component = component_creator(this);
     }
 
-    consumer_data(){
-        return this.store.getState().consumer_data;
+    consumer_state(){
+        return this.store.getState().consumer_state;
     }
 }

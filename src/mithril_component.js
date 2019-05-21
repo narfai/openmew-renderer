@@ -71,11 +71,11 @@ export const NamedAnchorGroup = {
         let attributes = Object.assign(
             {
                 'filterFn': (container) => {
-                    let consumer_data = container.consumer_data();
-                    return !(typeof consumer_data[name_key] === 'undefined'
+                    let consumer_state = container.consumer_state();
+                    return !(typeof consumer_state[name_key] === 'undefined'
                         || typeof name_key === 'undefined'
                         || typeof name === 'undefined'
-                        || consumer_data[name_key] !== name);
+                        || consumer_state[name_key] !== name);
                 }
             },
             attrs

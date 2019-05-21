@@ -10,16 +10,16 @@ import { ATTACH_TYPE, DETACH_TYPE } from './action';
 
 export function reducer_creator({ registry }){
     return (container) => {
-        function reducer(state = { 'containers': [], 'consumer_data': {} }, action){
+        function reducer(state = { 'containers': [], 'consumer_state': {} }, action){
             const allow = allow_reduction({state, action});
             const resource = state.resource || container.resource;
             const id = state.id || container.id;
             return {
                 id,
                 resource,
-                'consumer_data': allow === true
-                    ? registry.reducer(resource, state.consumer_data, action)
-                    : state.consumer_data,
+                'consumer_state': allow === true
+                    ? registry.reducer(resource, state.consumer_state, action)
+                    : state.consumer_state,
                 'containers': (
                     (containers) =>
                         containers.map((subState) =>
@@ -55,7 +55,7 @@ function internal_reducer({ state = [], action }){
                 ...state,
                 {
                     'id': action.id,
-                    'consumer_data': action.consumer_data || {},
+                    'consumer_state': action.consumer_state || {},
                     'resource': action.resource,
                     'containers': []
                 }

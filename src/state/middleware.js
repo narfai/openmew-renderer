@@ -39,11 +39,11 @@ export const attach_middleware = (registry) => (store) => (next) => (action) => 
         const state = container.store.getState();
 
         if(state && typeof state.containers !== 'undefined'){
-            state.containers.forEach(({id, resource, consumer_data}) => store.dispatch(
+            state.containers.forEach(({id, resource, consumer_state}) => store.dispatch(
                 Action.ATTACH({
                     id,
                     resource,
-                    consumer_data,
+                    consumer_state,
                     'parent_id': container.id
                 }))
             );

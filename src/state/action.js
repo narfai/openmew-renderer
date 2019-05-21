@@ -21,11 +21,11 @@ export class Action {
         };
     }
 
-    static ATTACH({ resource, consumer_data, id = null, parent_id = null, render = null }){
+    static ATTACH({ resource, consumer_state, id = null, parent_id = null, render = null }){
         return {
             'type': ATTACH_TYPE,
             resource,
-            consumer_data,
+            consumer_state,
             parent_id,
             render,
             id
