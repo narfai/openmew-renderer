@@ -9,7 +9,7 @@ Copyright (C) 2019 François Cadeillan <francois@azsystem.fr>
 import { Store } from './state/store';
 
 export class Container {
-    constructor({ id, from_store, component_creator, reducer, chain = []}){
+    constructor({ id, from_store, component_creator, resource, reducer, chain = []}){
         this.id = id;
         this.chain = [...chain, id];
         this.store = new Store({
@@ -25,7 +25,8 @@ export class Container {
                             : state
         });
 
-        this.reducer = reducer;
+        this.resource = resource;
+        this.reducer = reducer(this);
         this.component = component_creator(this);
     }
 

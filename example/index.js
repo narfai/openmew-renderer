@@ -78,7 +78,7 @@ var mock = {
     var registry = new OpenMewRenderer.Registry();
     var store = Redux.createStore(
         function(state){ return state },
-        mock,
+        {},
         Redux.applyMiddleware(
             OpenMewRenderer.register_middleware(registry),
             OpenMewRenderer.attach_middleware(registry),
@@ -109,6 +109,9 @@ var mock = {
         'view': function(context) {
             return function(){
                 var state = context.container.consumer_data();
+                if(typeof state === 'undefined') state = {};
+                if(typeof state.prefix === 'undefined') state.prefix = '';
+                if(typeof state.name === 'undefined') state.name = '';
                 return m('div',
                     {
                         className: 'App',
@@ -199,6 +202,9 @@ var mock = {
         'view': function(context){
             return function(vnode){
                 var state = context.container.consumer_data();
+                if(typeof state === 'undefined') state = {};
+                if(typeof state.text === 'undefined') state.text = '';
+                if(typeof state.number === 'undefined') state.number = '';
                 return m(
                     'div',
                     { className: 'Hello' },

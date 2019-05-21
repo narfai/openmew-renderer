@@ -9,30 +9,34 @@ Copyright (C) 2019 François Cadeillan <francois@azsystem.fr>
 import { ATTACH_TYPE, DETACH_TYPE } from './action';
 
 export function reducer_creator({ registry }){
-    function reducer(state = { 'containers': [], 'consumer_data': {} }, action){
-        const allow = allow_reduction({state, action});
-        return {
-            'id': state.id,
-            'resource': state.resource,
-            'consumer_data': allow === true
-                ? registry.reducer(state.resource, state.consumer_data, action)
-                : state.consumer_data,
-            'containers': (
-                (containers) =>
-                    containers.map((subState) =>
-                        typeof action.container_id !== 'undefined' && allow_propagation({'state': subState, action}) === true
-                            ? reducer(subState, action)
-                            : subState
-                    )
-            )(
-                allow === true
-                    ? internal_reducer({'state': state.containers, action })
-                    : state.containers
-            )
-        };
-    }
+    return (container) => {
+        function reducer(state = { 'containers': [], 'consumer_data': {} }, action){
+            const allow = allow_reduction({state, action});
+            const resource = state.resource || container.resource;
+            const id = state.id || container.id;
+            return {
+                id,
+                resource,
+                'consumer_data': allow === true
+                    ? registry.reducer(resource, state.consumer_data, action)
+                    : state.consumer_data,
+                'containers': (
+                    (containers) =>
+                        containers.map((subState) =>
+                            typeof action.container_id !== 'undefined' && allow_propagation({'state': subState, action}) === true
+                                ? reducer(subState, action)
+                                : subState
+                        )
+                )(
+                    allow === true
+                        ? internal_reducer({'state': state.containers, action })
+                        : state.containers
+                )
+            };
+        }
 
-    return reducer;
+        return reducer;
+    };
 }
 
 function allow_propagation({ state, action }){

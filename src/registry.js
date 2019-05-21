@@ -51,6 +51,7 @@ export class Registry {
             from_store,
             'component_creator': component_creator({ 'registry': this, view, controller }),
             'reducer': reducer_creator({ 'registry': this }),
+            resource,
             chain
         });
 
