@@ -17,6 +17,7 @@
     "webpack-cli": "^3.3.2"
   },
   "scripts": {
+    "prepublish": "yarn build",
     "watch": "webpack-cli --watch --config=./webpack.conf.js",
     "build": "webpack-cli --config=./webpack.conf.js --display-error-details --verbose",
     "lint": "eslint src"
