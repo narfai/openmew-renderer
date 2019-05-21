@@ -55,8 +55,9 @@ var web_prod = {
     },
     'output': {
         'path': path.resolve(__dirname, 'dist'),
-        'filename': 'openmew-renderer.min.js'
-
+        'filename': 'openmew-renderer.min.js',
+        'libraryTarget': 'umd',
+        'library': 'OpenMewRenderer'
     },
     'performance': { 'hints': 'error' }
 };
@@ -96,9 +97,7 @@ var nw_prod = {
     },
     'output': {
         'path': path.resolve(__dirname, 'dist'),
-        'filename': 'openmew-renderer.nw.js',
-        'libraryTarget': 'umd',
-        'library': 'OpenMewRenderer'
+        'filename': 'openmew-renderer.nw.js'
 
     },
     'performance': { 'hints': 'warning' }
