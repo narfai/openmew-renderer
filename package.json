@@ -1,27 +1,24 @@
 {
   "name": "openmew-renderer",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "OpenMew library which is able to render Mithril/Redux based components recursively",
-  "main": "/skel/dist/index.html",
+  "main": "/dist/openmew-renderer.js",
   "repository": "https://github.com/narfai/openmew-renderer.git",
   "author": "Francois Cadeillan <francois@azsystem.fr>",
   "license": "MPL-2.0",
   "devDependencies": {
-    "babel-core": "^6.26.0",
-    "babel-eslint": "^8.0.1",
-    "babel-loader": "^7.1.2",
-    "babel-plugin-transform-object-rest-spread": "^6.26.0",
-    "babel-plugin-transform-react-jsx": "^6.24.1",
-    "babel-preset-env": "^1.6.0",
-    "eslint": "^4.8.0",
+    "@babel/core": "^7.4.4",
+    "babel-eslint": "^10.0.1",
+    "babel-loader": "^8.0.6",
+    "eslint": "^5.16.0",
     "mithril": "^1.1.4",
-    "redux": "^3.7.2",
-    "webpack": "^3.6.0",
-    "uniqid": "^5.0.3"
+    "uniqid": "^5.0.3",
+    "webpack": "^4.32.0",
+    "webpack-cli": "^3.3.2"
   },
   "scripts": {
-    "build": "webpack --config=./webpack.conf.js --display-error-details --verbose",
-    "watch": "webpack --watch --config=./webpack.conf.js",
+    "watch": "webpack-cli --watch --config=./webpack.conf.js",
+    "build": "webpack-cli --config=./webpack.conf.js --display-error-details --verbose",
     "lint": "eslint src"
   }
 }

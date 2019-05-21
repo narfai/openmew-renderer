@@ -1,0 +1,13 @@
+{
+  "name": "openmew-renderer-example",
+  "version": "0.0.1",
+  "description": "OpenMewRenderer sample",
+  "main": "index.html",
+  "repository": "https://github.com/narfai/openmew-renderer.git",
+  "author": "Francois Cadeillan <francois@azsystem.fr>",
+  "license": "WTFPL",
+  "devDependencies": {
+    "mithril": "^1.1.6",
+    "redux": "^4.0.1"
+  }
+}

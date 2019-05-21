@@ -13,39 +13,96 @@ TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
 0. You just DO WHAT THE FUCK YOU WANT TO.
 */
 
+/* eslint-disable */
 var path = require('path');
 
-module.exports = {
+var web_dev = {
+    'mode': 'development',
+    'target': 'web',
     'devtool': 'inline-source-map',
-    'entry': { 'app': './skel/src/index.js' },
+    'entry': { 'app': './src/index.js' },
     'resolve': { 'alias': { 'openmew-renderer': path.resolve(__dirname, 'src') } },
     'module': {
         'rules': [
             {
                 'test': /\.js$/,
-                'use': [
-                    {
-                        'loader': 'babel-loader',
-                        'options': {
-                            'presets': [ 'env' ],
-                            'plugins': [
-                                [ 'transform-object-rest-spread' ],
-                                [ 'transform-react-jsx', { 'pragma': 'm' } ]
-                            ]
-                        }
-                    }
-                ]
-            },
-            {
-                'test': /.json$/,
-                'loader': 'json-loader'
+                'use': [ { 'loader': 'babel-loader' } ]
             }
         ]
     },
     'output': {
-        'path': path.resolve(__dirname, 'skel', 'dist'),
-        'filename': '[name].js'
+        'path': path.resolve(__dirname, 'dist'),
+        'filename': 'openmew-renderer.js',
+        'libraryTarget': 'umd',
+        'library': 'OpenMewRenderer'
+
     },
-    'watchOptions': { 'poll': true }
+    'performance': { 'hints': false }
 };
 
+var web_prod = {
+    'mode': 'development',
+    'target': 'web',
+    'devtool': 'none',
+    'entry': { 'app': './src/index.js' },
+    'module': {
+        'rules': [
+            {
+                'test': /\.js$/,
+                'use': [ { 'loader': 'babel-loader' } ]
+            }
+        ]
+    },
+    'output': {
+        'path': path.resolve(__dirname, 'dist'),
+        'filename': 'openmew-renderer.min.js'
+
+    },
+    'performance': { 'hints': 'error' }
+};
+
+var nw_dev = {
+    'mode': 'development',
+    'target': 'node-webkit',
+    'devtool': 'inline-source-map',
+    'entry': { 'app': './src/index.js' },
+    'module': {
+        'rules': [
+            {
+                'test': /\.js$/,
+                'use': [ { 'loader': 'babel-loader' } ]
+            }
+        ]
+    },
+    'output': {
+        'path': path.resolve(__dirname, 'dist'),
+        'filename': 'openmew-renderer.nw.js'
+    },
+    'performance': { 'hints': false }
+};
+
+var nw_prod = {
+    'mode': 'production',
+    'target': 'node-webkit',
+    'devtool': 'none',
+    'entry': { 'app': './src/index.js' },
+    'module': {
+        'rules': [
+            {
+                'test': /\.js$/,
+                'use': [ { 'loader': 'babel-loader' } ]
+            }
+        ]
+    },
+    'output': {
+        'path': path.resolve(__dirname, 'dist'),
+        'filename': 'openmew-renderer.nw.js',
+        'libraryTarget': 'umd',
+        'library': 'OpenMewRenderer'
+
+    },
+    'performance': { 'hints': 'warning' }
+};
+
+
+module.exports = [ web_dev, web_prod, nw_dev, nw_prod ];
