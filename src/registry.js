@@ -9,6 +9,7 @@ Copyright (C) 2019 François Cadeillan <francois@azsystem.fr>
 import { Container } from './container';
 import { reducer_creator } from './state/reducer';
 import { component_creator } from './mithril_component';
+import format from './format';
 
 export class Registry {
     constructor(){
@@ -16,13 +17,8 @@ export class Registry {
         this.containers = {};
     }
 
-    register({ resource, view = null, reducer = null, controller = null }){
-        this.blueprints[resource] = {
-            resource,
-            view,
-            reducer,
-            controller
-        };
+    register({ resource, ...other }){
+        this.blueprints[resource] = format.blueprint({ resource, ...other });
     }
 
     attach(store, { id, resource, parent_id = null }){
@@ -66,6 +62,17 @@ export class Registry {
         const { reducer } = this.blueprints[resource];
 
         if(reducer !== null) return reducer(state, action);
+
+        return state;
+    }
+
+    containers_reducer(resource, state, action){
+        if(typeof this.blueprints[resource] === 'undefined')
+            throw new Error('Unregistered resource ' + resource);
+
+        const { containers_reducer } = this.blueprints[resource];
+
+        if(containers_reducer !== null) return containers_reducer(state, action);
 
         return state;
     }

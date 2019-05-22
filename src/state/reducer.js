@@ -7,31 +7,37 @@ Copyright (C) 2019 François Cadeillan <francois@azsystem.fr>
 */
 
 import { ATTACH_TYPE, DETACH_TYPE } from './action';
+import format from '../format';
 
 export function reducer_creator({ registry }){
     return (container) => {
-        function reducer(state = { 'containers': [], 'consumer_state': {} }, action){
+        function reducer(state = { 'id': container.id, 'resource': container.resource, 'containers': [], 'consumer_state': {} }, action){
+            const propagate = state.containers.filter((subState) => allow_propagation({ 'state': subState, action }) === true);
             const allow = allow_reduction({state, action});
-            const resource = state.resource || container.resource;
-            const id = state.id || container.id;
+
+            if(allow === false && propagate.length === 0) return state;
+
             return {
-                id,
-                resource,
+                ...state,
                 'consumer_state': allow === true
-                    ? registry.reducer(resource, state.consumer_state, action)
+                    ? registry.reducer(state.resource, state.consumer_state, action)
                     : state.consumer_state,
                 'containers': (
-                    (containers) =>
-                        containers.map((subState) =>
-                            typeof action.container_id !== 'undefined' && allow_propagation({'state': subState, action}) === true
-                                ? reducer(subState, action)
-                                : subState
-                        )
-                )(
-                    allow === true
-                        ? internal_reducer({'state': state.containers, action })
-                        : state.containers
-                )
+                        (containers) =>
+                            containers.map((subState) =>
+                                typeof action.container_id !== 'undefined' && propagate.includes(subState)
+                                    ? reducer(subState, action)
+                                    : subState
+                            )
+                    )(
+                        allow === true
+                            ? registry.containers_reducer(
+                                state.resource,
+                                containers_reducer(state.containers, action),
+                                action
+                            )
+                            : state.containers
+                    )
             };
         }
 
@@ -47,18 +53,13 @@ function allow_reduction({ state, action }){
     return (typeof action.reduce === 'undefined' || action.reduce(state) === true);
 }
 
-function internal_reducer({ state = [], action }){
+function containers_reducer(state = [], action){
     switch (action.type){
         case ATTACH_TYPE:
             if(action.parent_id === null) return state;
             return [
                 ...state,
-                {
-                    'id': action.id,
-                    'consumer_state': action.consumer_state || {},
-                    'resource': action.resource,
-                    'containers': []
-                }
+                format.container(action)
             ];
         case DETACH_TYPE:
             return state.filter(({ id }) => id !== action.id);

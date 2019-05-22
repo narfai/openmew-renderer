@@ -31,6 +31,6 @@ export class Container {
     }
 
     consumer_state(){
-        return this.store.getState().consumer_state;
+        return { ...this.store.getState().consumer_state };
     }
 }

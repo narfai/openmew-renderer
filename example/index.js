@@ -52,12 +52,14 @@ var mock = {
                                     'consumer_state': {
                                         'text': 'CookieWorld',
                                         'number': 999
-                                    }
+                                    },
+                                    'containers': []
                                 },
                                 {
                                     'id': 'jvs2y724',
                                     'resource': 'Application.Hello',
-                                    'consumer_state': { 'text': 'PrettyWorld', 'number': 1111 }
+                                    'consumer_state': { 'text': 'PrettyWorld', 'number': 1111 },
+                                    'containers': []
                                 }
                             ]
                         }
@@ -69,7 +71,8 @@ var mock = {
             'id': 'jvs2y6by',
             'name': 'CreepyWorld',
             'resource': 'Application.Hello',
-            'consumer_state': { 'text': 'CreepyWorld', 'number': 888 }
+            'consumer_state': { 'text': 'CreepyWorld', 'number': 888 },
+            'containers': []
         }
     ]
 };
@@ -204,11 +207,12 @@ var mock = {
                 var state = context.container.consumer_state();
                 if(typeof state === 'undefined') state = {};
                 if(typeof state.text === 'undefined') state.text = '';
-                if(typeof state.number === 'undefined') state.number = '';
+                if(typeof state.number === 'undefined') state.number = 0;
+
                 return m(
                     'div',
                     { className: 'Hello' },
-                    'Hello ' + state.name + ' ' + state.text + ' #' + state.number,
+                    'Hello ' + state.text + ' #' + state.number,
                     [
                         m(
                             'button',
