@@ -12,6 +12,9 @@ import format from '../format';
 export function reducer_creator({ registry }){
     return (container) => {
         function reducer(state = { 'id': container.id, 'resource': container.resource, 'containers': [], 'consumer_state': {} }, action){
+            if(typeof state.id === 'undefined')
+                state = format.container({ 'id': container.id, 'resource': container.resource });
+
             const propagate = state.containers.filter((subState) => allow_propagation({ 'state': subState, action }) === true);
             const allow = allow_reduction({state, action});
 
