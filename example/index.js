@@ -273,7 +273,7 @@ var mock = {
         'render': function(context){
             store.replaceReducer(context.container.reducer);
             store.subscribe(function() {
-                console.log('RENDER');
+                console.log('RENDER', store.getState());
                 m.render(document.getElementById('app'), m(context.container.component));
             });
         }

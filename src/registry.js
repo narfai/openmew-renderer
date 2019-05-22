@@ -74,9 +74,11 @@ export class Registry {
     }
 
     detach({ id }){
-        if(typeof this.containers[id] !== 'undefined') {
-            this.containers[id].containers.forEach((child) => {
-                this.detach({'id': child.id});
+        if(typeof this.containers[id] !== 'undefined'){
+            const container = this.containers[id];
+            const { containers } = container.store.getState();
+            containers.forEach((child) => {
+                this.detach({'id': child.id });
             });
             delete this.containers[id];
         }
