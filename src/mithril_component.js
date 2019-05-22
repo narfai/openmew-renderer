@@ -7,26 +7,53 @@ Copyright (C) 2019 François Cadeillan <francois@azsystem.fr>
 */
 
 import m from 'mithril';
+import { Spread, Action } from './state/action';
 
-export function component_creator({ registry, view = null, controller = null }){
-    return (container) => {
-        const expose = { registry, container };
+const ALLOWED_LIFECYCLE = ['oncreate', 'onupdate', 'onbeforeremove', 'onremove'];
 
-        const component = {
-            'view': view !== null
-                ? view(expose)
-                : () => m('#')
-        };
+export const component_creator = (registry, { view = null, controller = null, lifecycle = {}}) =>
+    (container) =>
+        (
+            (expose) => ({
+                'view': view !== null
+                    ? view
+                    : () => m('#'),
+                'oninit': function(initial_vnode){
+                    if(controller !== null) controller.call(this, initial_vnode, expose);
+                    return Object.assign(this, expose, {
+                        'store_state': container.store.getState()
+                    });
+                },
+                'onupdate': function(vnode){
+                    this.store_state = container.store.getState();
+                    if(
+                        typeof lifecycle.onupdate !== 'undefined'
+                        && lifecycle.onupdate !== null
+                    ) lifecycle.onupdate(vnode, expose);
+                },
+                'onbeforeupdate': function(vnode, old_vnode){
+                    const now_state = container.store.getState();
+                    const choice = old_vnode.state.store_state !== now_state
+                        || (
+                            typeof lifecycle.onbeforeupdate !== 'undefined'
+                                && lifecycle.onbeforeactivate !== null
+                                && lifecycle.onbeforeupdate(vnode, old_vnode, expose)
+                        );
+                    this.store_state = now_state;
+                    return choice;
+                },
+                ...Object.keys(lifecycle)
+                    .filter((key) => ALLOWED_LIFECYCLE.includes(key))
+                    .reduce((comp, key) => (comp[key] = lifecycle[key], lifecycle), {})
+            })
+        )({
+            registry,
+            container,
+            'spread': Spread,
+            'action': Action
+        })
+;
 
-        if(controller !== null){
-            component.oninit = function BlueprintController(initial_vnode){
-                controller.call(this, { initial_vnode, ...expose });
-                return this;
-            };
-        }
-        return component;
-    };
-}
 
 export const Anchor = {
     'view': (vnode) => {

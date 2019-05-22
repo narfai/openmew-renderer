@@ -9,7 +9,7 @@ Copyright (C) 2019 François Cadeillan <francois@azsystem.fr>
 import { ATTACH_TYPE, DETACH_TYPE } from './action';
 import format from '../format';
 
-export function reducer_creator({ registry }){
+export function reducer_creator(registry){
     return (container) => {
         function reducer(state = { 'id': container.id, 'resource': container.resource, 'containers': [], 'consumer_state': {} }, action){
             if(typeof state.id === 'undefined')

@@ -19,6 +19,7 @@ export const register_middleware = (registry) => () => (next) => (action) => {
     delete action.view;
     delete action.reducer;
     delete action.controller;
+    delete action.lifecycle;
     return next(action);
 };
 
@@ -29,9 +30,9 @@ export const attach_middleware = (registry) => (store) => (next) => (action) => 
     if(action.id === null){
         let initial_state = store.getState();
         action.id = action.parent_id === null
-        && typeof initial_state.id !== 'undefined'
-            ? initial_state.id
-            : uniqid();
+            && typeof initial_state.id !== 'undefined'
+                ? initial_state.id
+                : uniqid();
     }
 
     const container = registry.attach(store, action);

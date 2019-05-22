@@ -89,9 +89,9 @@ var mock = {
         )
     );
 
-    store.subscribe(function() {
-        console.log('STATE', store.getState());
-    });
+    // store.subscribe(function() {
+    //     console.log('STATE', store.getState());
+    // });
 
     store.dispatch(OpenMewRenderer.Action.REGISTER_BLUEPRINT({
         'resource': 'Application.Main',
@@ -109,63 +109,65 @@ var mock = {
                     return state;
             }
         },
-        'view': function(context) {
-            return function(){
-                var state = context.container.consumer_state();
-                if(typeof state === 'undefined') state = {};
-                if(typeof state.prefix === 'undefined') state.prefix = '';
-                if(typeof state.name === 'undefined') state.name = '';
-                return m('div',
-                    {
-                        className: 'App',
-                        style: 'background-color: grey;'
-                    },
-                    [
-                        m(
-                            'h1',
-                            {
-                                style: 'color: green;'
-                            },
-                            'UI -' + state.prefix + ' ' + state.name
-                        ),
-                        m(
-                            'div',
-                            [
-                                m('h2', 'Zone 1'),
-                                m(OpenMewRenderer.NamedAnchorGroup, {
-                                    id: context.container.id,
-                                    registry: context.registry,
-                                    name_key: 'text',
-                                    name: 'CandyWorld',
-                                    optional: 'this is optional data injected from App'
-                                })
-                            ]
-                        ),
-                        m(
-                            'div',
-                            [
-                                m('h2', 'Zone 2'),
-                                m(OpenMewRenderer.AnchorGroup, {
-                                    id: context.container.id,
-                                    registry: context.registry,
-                                    wrapper: 'li'
-                                })
-                            ]
-                        )
-                    ]
-                );
-            }
+        'view': function(vnode){
+            // console.log('VIEWSTATE', vnode.state);
+            var state = vnode.state.store_state.consumer_state;
+            if(typeof state === 'undefined') state = {};
+            if(typeof state.prefix === 'undefined') state.prefix = '';
+            if(typeof state.name === 'undefined') state.name = '';
+            return m('div',
+                {
+                    className: 'App',
+                    style: 'background-color: grey;'
+                },
+                [
+                    m(
+                        'h1',
+                        {
+                            style: 'color: green;'
+                        },
+                        'UI -' + state.prefix + ' ' + state.name
+                    ),
+                    m(
+                        'div',
+                        [
+                            m('h2', 'Zone 1'),
+                            m(OpenMewRenderer.NamedAnchorGroup, {
+                                id: vnode.state.container.id,
+                                registry: vnode.state.registry,
+                                name_key: 'text',
+                                name: 'CandyWorld',
+                                optional: 'this is optional data injected from App'
+                            })
+                        ]
+                    ),
+                    m(
+                        'div',
+                        [
+                            m('h2', 'Zone 2'),
+                            m(OpenMewRenderer.AnchorGroup, {
+                                id: vnode.state.container.id,
+                                registry: vnode.state.registry,
+                                wrapper: 'li'
+                            })
+                        ]
+                    )
+                ]
+            );
         }
     }));
 
     store.dispatch(OpenMewRenderer.Action.REGISTER_BLUEPRINT({
         'resource': 'Application.Hello',
-        'controller': function HelloController(context){
+        'lifecycle': {
+            'onupdate': function(vnode) { console.log('UPDATE', vnode); },
+        },
+        'controller': function HelloController(vnode, context){
             this.dispatch = {
-                'doIncrement': OpenMewRenderer.Spread.self_scope(context.container, function() { return { 'type': 'INCREMENT' }; }),
-                'doIncrementChain': OpenMewRenderer.Spread.chain_scope(context.container, function() { return { 'type': 'INCREMENT' }; }),
-                'doIncrementAll': OpenMewRenderer.Spread.global_scope(context.container, function() { return { 'type': 'INCREMENT' }; }),
-                'addNewModule': OpenMewRenderer.Spread.self_scope(context.container, function() { return OpenMewRenderer.Action.ATTACH({
+                'doIncrement': context.spread.self_scope(context.container, function() { return { 'type': 'INCREMENT' }; }),
+                'doIncrementChain': context.spread.chain_scope(context.container, function() { return { 'type': 'INCREMENT' }; }),
+                'doIncrementAll': context.spread.global_scope(context.container, function() { return { 'type': 'INCREMENT' }; }),
+                'addNewModule': context.spread.self_scope(context.container, function() { return context.action.ATTACH({
                     'resource': 'Application.Hello',
                     'parent_id': context.container.id,
                     'consumer_state': { 'text': 'NEW MODULE !', 'number': '6666666' },
@@ -174,8 +176,8 @@ var mock = {
                     }
                 });
                 }),
-                'deleteMe': OpenMewRenderer.Spread.parent_scope(context.container, function() {
-                    return OpenMewRenderer.Action.DETACH({
+                'deleteMe': context.spread.parent_scope(context.container, function() {
+                    return context.action.DETACH({
                         'id': context.container.id
                     });
                 })
@@ -202,74 +204,73 @@ var mock = {
                     return state;
             }
         },
-        'view': function(context){
-            return function(vnode){
-                var state = context.container.consumer_state();
-                if(typeof state === 'undefined') state = {};
-                if(typeof state.text === 'undefined') state.text = '';
-                if(typeof state.number === 'undefined') state.number = 0;
+        'view': function(vnode){
+                console.log('VIEWVNODE', vnode.state);
+            var state = vnode.state.store_state.consumer_state;
+            if(typeof state === 'undefined') state = {};
+            if(typeof state.text === 'undefined') state.text = '';
+            if(typeof state.number === 'undefined') state.number = 0;
 
-                return m(
-                    'div',
-                    { className: 'Hello' },
-                    'Hello ' + state.text + ' #' + state.number,
-                    [
-                        m(
-                            'button',
-                            {
-                                type: 'button',
-                                onclick: vnode.state.dispatch.doIncrement
-                            },
-                            'Increment self ' + context.container.id
-                        ),
-                        m(
-                            'button',
-                            {
-                                type: 'button',
-                                onclick: vnode.state.dispatch.doIncrementChain
-                            },
-                            'Increment bubble'
-                        ),
-                        m(
-                            'button',
-                            {
-                                type: 'button',
-                                onclick: vnode.state.dispatch.doIncrementAll
-                            },
-                            'Increment all'
-                        ),
-                        m(
-                            'button',
-                            {
-                                type: 'button',
-                                onclick: vnode.state.dispatch.addNewModule
-                            },
-                            'Attach new'
-                        ),
-                        m(
-                            'button',
-                            {
-                                type: 'button',
-                                onclick: vnode.state.dispatch.deleteMe
-                            },
-                            'Detach me'
-                        ),
-                        m(
-                            'ul',
-                            [
-                                m(OpenMewRenderer.AnchorGroup, { registry: registry, id: context.container.id, wrapper:'li' })
-                            ]
-                        )
-                    ]
-                );
-            }
+            return m(
+                'div',
+                { className: 'Hello' },
+                'Hello ' + state.text + ' #' + state.number,
+                [
+                    m(
+                        'button',
+                        {
+                            type: 'button',
+                            onclick: vnode.state.dispatch.doIncrement
+                        },
+                        'Increment self ' + vnode.state.container.id
+                    ),
+                    m(
+                        'button',
+                        {
+                            type: 'button',
+                            onclick: vnode.state.dispatch.doIncrementChain
+                        },
+                        'Increment bubble'
+                    ),
+                    m(
+                        'button',
+                        {
+                            type: 'button',
+                            onclick: vnode.state.dispatch.doIncrementAll
+                        },
+                        'Increment all'
+                    ),
+                    m(
+                        'button',
+                        {
+                            type: 'button',
+                            onclick: vnode.state.dispatch.addNewModule
+                        },
+                        'Attach new'
+                    ),
+                    m(
+                        'button',
+                        {
+                            type: 'button',
+                            onclick: vnode.state.dispatch.deleteMe
+                        },
+                        'Detach me'
+                    ),
+                    m(
+                        'ul',
+                        [
+                            m(OpenMewRenderer.AnchorGroup, { registry: vnode.state.registry, id: vnode.state.container.id, wrapper:'li' })
+                        ]
+                    )
+                ]
+            );
         }
+
     }));
 
     store.dispatch(OpenMewRenderer.Action.ATTACH({
         'resource': 'Application.Main',
         'render': function(context){
-            console.log('cointainer');
             store.replaceReducer(context.container.reducer);
             store.subscribe(function() {
                 console.log('RENDER');

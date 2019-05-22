@@ -25,28 +25,25 @@ export class Registry {
         if(typeof this.blueprints[resource] === 'undefined')
             throw new Error('Unregistered resource ' + resource);
 
-        if(typeof this.containers[id] !== 'undefined')
-            return null;
+        let parent;
+        const { chain, from_store } = Object.assign({
+            'chain': [],
+            'from_store': store
+        }, (
+            parent_id !== null
+                ? (
+                    parent = this.get_or_fail(parent_id),
+                    { 'from_store': parent.store, 'chain': parent.chain }
+                  )
+                : null
+        ));
 
-        const { chain, from_store } = (() => {
-            if(parent_id){
-                const parent = this.get_or_fail(parent_id);
-                return {'from_store': parent.store, 'chain': parent.chain};
-            }
-
-            return {
-                'chain': [],
-                'from_store': store
-            };
-        })();
-
-        const { view, controller } = this.blueprints[resource];
-
+        console.log('BLUEPRINTS', this.blueprints[resource]);
         const container = new Container({
             id,
             from_store,
-            'component_creator': component_creator({ 'registry': this, view, controller }),
-            'reducer': reducer_creator({ 'registry': this }),
+            'component_creator': component_creator(this, this.blueprints[resource]),
+            'reducer': reducer_creator(this),
             resource,
             chain
         });
@@ -78,8 +75,12 @@ export class Registry {
     }
 
     detach({ id }){
-        if(typeof this.containers[id] !== 'undefined')
+        if(typeof this.containers[id] !== 'undefined') {
+            this.containers[id].containers.forEach((child) => {
+                this.detach({'id': child.id});
+            });
             delete this.containers[id];
+        }
     }
 
     get(id){
