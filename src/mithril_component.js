@@ -19,7 +19,7 @@ export const component_creator = (registry, { view = null, controller = null, li
                     ? view
                     : () => m('#'),
                 'oninit': function(initial_vnode){
-                    if(controller !== null) controller.call(this, initial_vnode, expose);
+                    if(controller !== null) controller.call(this, expose, initial_vnode);
                     return Object.assign(this, expose, {
                         'store_state': container.store.getState()
                     });

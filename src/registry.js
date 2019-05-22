@@ -38,7 +38,6 @@ export class Registry {
                 : null
         ));
 
-        console.log('BLUEPRINTS', this.blueprints[resource]);
         const container = new Container({
             id,
             from_store,
