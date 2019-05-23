@@ -162,6 +162,9 @@ var mock = {
         'lifecycle': {
             'onupdate': function(vnode) { console.log('UPDATE', vnode); },
         },
+        // 'containers_reducer': function({ id, consumer_state }, state, action){
+        //     return state;
+        // },
         'controller': function HelloController(context){
             this.dispatch = {
                 'doIncrement': context.spread.self_scope(context.container, function() { return { 'type': 'INCREMENT' }; }),

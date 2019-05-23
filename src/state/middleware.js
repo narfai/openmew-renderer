@@ -27,14 +27,6 @@ export const attach_middleware = (registry) => (store) => (next) => (action) => 
     if (action.type !== ATTACH_TYPE)
         return next(action);
 
-    if(action.id === null){
-        let initial_state = store.getState();
-        action.id = action.parent_id === null
-            && typeof initial_state.id !== 'undefined'
-                ? initial_state.id
-                : uniqid();
-    }
-
     const container = registry.attach(store, action);
     if(container !== null){
         const state = container.store.getState();

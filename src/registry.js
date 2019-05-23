@@ -10,6 +10,7 @@ import { Container } from './container';
 import { reducer_creator } from './state/reducer';
 import { component_creator } from './mithril_component';
 import format from './format';
+import uniqid from "uniqid";
 
 export class Registry {
     constructor(){
@@ -24,6 +25,14 @@ export class Registry {
     attach(store, { id, resource, parent_id = null }){
         if(typeof this.blueprints[resource] === 'undefined')
             throw new Error('Unregistered resource ' + resource);
+
+        if(id === null){
+            let initial_state = store.getState();
+            id = parent_id === null
+                && typeof initial_state.id !== 'undefined'
+                    ? initial_state.id
+                    : uniqid();
+        }
 
         let parent;
         const { chain, from_store } = Object.assign({
@@ -62,13 +71,13 @@ export class Registry {
         return state;
     }
 
-    containers_reducer(resource, state, action){
+    containers_reducer({ resource, ...parent_state }, state, action){
         if(typeof this.blueprints[resource] === 'undefined')
             throw new Error('Unregistered resource ' + resource);
 
         const { containers_reducer } = this.blueprints[resource];
 
-        if(containers_reducer !== null) return containers_reducer(state, action);
+        if(containers_reducer !== null) return containers_reducer(parent_state, state, action);
 
         return state;
     }

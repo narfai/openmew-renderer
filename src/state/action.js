@@ -11,11 +11,12 @@ export const ATTACH_TYPE = 'ATTACH';
 export const DETACH_TYPE = 'DETACH';
 
 export class Action {
-    static REGISTER_BLUEPRINT({ resource, view, reducer = null, controller = null, lifecycle = {} }){
+    static REGISTER_BLUEPRINT({ resource, view, reducer = null, containers_reducer = null, controller = null, lifecycle = {} }){
         return {
             'type': REGISTER_TYPE,
             resource,
             view,
+            containers_reducer,
             reducer,
             controller,
             lifecycle

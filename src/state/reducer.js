@@ -35,7 +35,7 @@ export function reducer_creator(registry){
                     )(
                         allow === true
                             ? registry.containers_reducer(
-                                state.resource,
+                                state,
                                 containers_reducer(state.containers, action),
                                 action
                             )
