@@ -68,7 +68,9 @@ const controller_transducer = (filter_resource) => (provider, action_creators = 
         ...next_component,
         'oninit': function(vnode){
             this.provider = provider;
-            this.store = store;
+            this.store = store instanceof Store
+                ? store
+                : new Store({ store });
 
             if(oninit !== null) oninit.call(this, vnode);
         }

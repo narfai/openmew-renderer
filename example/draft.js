@@ -42,6 +42,7 @@ assert.not_equals = (a, b) => assert(a !== b, assert.format(a, ' not equals to '
 
     const app_view = {
         'view': ({ state: { store, provider } }) => {
+            console.log('App store chain', store.getChain());
             return m(
                 'div',
                 [
@@ -55,7 +56,7 @@ assert.not_equals = (a, b) => assert(a !== b, assert.format(a, ' not equals to '
 
     const hello_view = {
         'view': ({ state: { store, provider } }) => {
-            console.log('hello view', store, provider);
+            console.log('Hello store chain', store.getChain());
             const state = store.getState();
             return m(
                 'div',

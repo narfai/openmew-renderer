@@ -1,12 +1,14 @@
 import uniqid from 'uniqid';
 
 export class Store {
-    constructor({ id, store, select = null }){
+    constructor({ store, id = null, select = null }){
         this.store = store;
         this.select = select;
         this.chain = store instanceof Store
             ? store.getChain()
-            : [id]
+            : id === null
+                ? []
+                : [id]
         ;
     }
 
