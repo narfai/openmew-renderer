@@ -17,12 +17,7 @@ export const Anchor = {
 };
 
 
-const component_identity = ({ view = null, ...lifecycle }) => ({
-    'view': view === null
-        ? () => m('#')
-        : view,
-    ...lifecycle
-});
+
 
 const statefull_component = (provider) => ({ oninit, ...component }) => {
     return {
