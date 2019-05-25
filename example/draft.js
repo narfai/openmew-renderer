@@ -17,7 +17,7 @@ assert.format = (...args) => JSON.stringify([...args]);
 assert.equals = (a, b) => assert(a === b, assert.format(a, ' equals to ', b));
 assert.not_equals = (a, b) => assert(a !== b, assert.format(a, ' not equals to ', b));
 
-(function({ draft: { Provider, module_identity, propagate_transducer, attach_transducer, Anchor, AnchorGroup } }, { createStore }, m){
+(function({ draft: { Provider, module_identity, propagate_transducer, attach_transducer } }, { createStore }, m){
     const resource_filter_transducer = (next) => (resource) => (state, action) => {
         if(resource !== state.resource) return state;
         return next(resource)(state, action);
@@ -47,7 +47,7 @@ assert.not_equals = (a, b) => assert(a !== b, assert.format(a, ' not equals to '
                 [
                     // m('button', )
                     m('h1', 'App !'),
-                    m(AnchorGroup, { store, provider })
+                    m(provider.AnchorGroup, { store, provider })
                 ]
             );
         }
@@ -62,7 +62,7 @@ assert.not_equals = (a, b) => assert(a !== b, assert.format(a, ' not equals to '
                 [
                     // m('button', )
                     m('h1', 'Hello ! (' + state.resource + ') #' + state.id),
-                    m(AnchorGroup, { store, provider })
+                    m(provider.AnchorGroup, { store, provider })
                 ]
             );
         }

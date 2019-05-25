@@ -1,31 +1,30 @@
 import uniqid from 'uniqid';
 
 import { Store, module_identity, propagate_transducer, attach_transducer } from './state';
-import m from 'mithril';
 
 const compose = (...func) => (...args) => func.reduce((acc, cur) => cur(acc), ...args);
 const pipe = (...func) => compose(...func.reverse());
 
 
-export const Anchor = {
+export const anchor = (mithril) => ({
     'oninit': function({ 'attrs': { store, provider }}){
         console.log('anchor for ', store.getState(), store.getChain());
         this.component = provider.component(store);
 
     },
     'view': (vnode) => {
-        return m(
+        return mithril(
             'div',
             [
-                m('h1', 'ANCHOR'),
-                m(vnode.state.component)
+                mithril('h1', 'ANCHOR'),
+                mithril(vnode.state.component)
             ]
         );
     }
-};
+});
 
 
-export const AnchorGroup = {
+export const anchor_group = (mithril) => ({
     'oninit': function({ 'attrs': { provider }}){
         const stores = {};
         this.attributes = (id, store) => {
@@ -37,15 +36,15 @@ export const AnchorGroup = {
             });
         };
     },
-    'view': ({ 'state': { attributes }, 'attrs': { store, filterFn = () => true, wrapper = null }}) => {
+    'view': ({ 'state': { attributes }, 'attrs': { store, provider, filterFn = () => true, wrapper = null }}) => {
         return store.getState().children
             .filter((child_state) => filterFn(child_state))
             .map(({id}) => wrapper !== null
-                ? m(wrapper, {'key': id}, [m(Anchor, attributes(id, store))])
-                : m(Anchor, attributes(id, store))
+                ? mithril(wrapper, {'key': id}, [mithril(provider.Anchor, attributes(id, store))])
+                : mithril(provider.Anchor, attributes(id, store))
             );
     }
-};
+});
 
 
 const component_transducer = (filter_resource) => (item) => (next) => (store = null) => {
@@ -79,6 +78,8 @@ export class Provider {
     constructor(mithril){
         this.component = (/*query_store*/) => ({ 'view': () => mithril('#') });
         this.reducer = (/*query_resource*/) => (state) => state;
+        this.Anchor = anchor(mithril);
+        this.AnchorGroup = anchor_group(mithril);
     }
 
     connect_component(resource, component, action_creators){
@@ -99,9 +100,7 @@ export const draft = {
     Provider,
     module_identity,
     propagate_transducer,
-    attach_transducer,
-    Anchor,
-    AnchorGroup
+    attach_transducer
 };
 
 
