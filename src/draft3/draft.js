@@ -48,12 +48,13 @@ export const anchor_group = (mithril) => ({
 
 
 const component_transducer = (filter_resource) => (item) => (next) => (store = null) => {
-        if(store === null) return next(store);
+        const next_component = next(store);
+        if(store === null || filter_resource !== store.getState().resource) return next_component;
 
         const { resource } = store.getState();
         return filter_resource === resource
             ? item
-            : next(store);
+            : next_component;
     }
 ;
 
