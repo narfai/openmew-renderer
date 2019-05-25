@@ -1,15 +1,21 @@
-import { Store } from './state';
+import { Store } from './store';
 
 export const anchor = (mithril) => ({
     'oninit': function({ 'attrs': { store, provider }}){
         this.component = provider.component(store);
+        this.getState = () => store.getState();
     },
-    'view': (vnode) => {
+    'view': ({ state, attrs }) => {
         return mithril(
             'div',
             [
-                mithril('h1', 'ANCHOR'),
-                mithril(vnode.state.component)
+                mithril(
+                    state.component,
+                    {
+                        'anchor': { ...attrs },
+                        'state': state.getState()
+                    }
+                )
             ]
         );
     }
@@ -38,7 +44,7 @@ export const anchor_group = (mithril) => ({
 });
 
 
-export const component_transducer = (filter_resource) => (item) => (next) => (store = null) => {
+export const component = (filter_resource) => (item) => (next) => (store = null) => {
         const next_component = next(store);
         if(store === null || filter_resource !== store.getState().resource) return next_component;
 
@@ -49,7 +55,13 @@ export const component_transducer = (filter_resource) => (item) => (next) => (st
     }
 ;
 
-export const controller_transducer = (filter_resource) => (provider, action_creators = null) => (next) => (store) => {
+
+import { ScopeSpreader } from './action';
+
+
+const action_creator_identity = (/*scope*/) => {};
+
+export const controller = (filter_resource) => (provider, action_creator = action_creator_identity()) => (next) => (store) => {
     const next_component = next(store);
     if(store === null || filter_resource !== store.getState().resource) return next_component;
 
@@ -62,6 +74,10 @@ export const controller_transducer = (filter_resource) => (provider, action_crea
             this.store = store instanceof Store
                 ? store
                 : new Store({ store });
+
+            // this.action = {
+            //     ...action_creator(ScopeSpreader)
+            // };
 
             if(oninit !== null) oninit.call(this, vnode);
         }

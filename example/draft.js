@@ -17,13 +17,9 @@ assert.format = (...args) => JSON.stringify([...args]);
 assert.equals = (a, b) => assert(a === b, assert.format(a, ' equals to ', b));
 assert.not_equals = (a, b) => assert(a !== b, assert.format(a, ' not equals to ', b));
 
-(function({ rc: { Provider, module_identity, propagate_transducer, attach_transducer } }, { createStore }, m){
-    const resource_filter_transducer = (next) => (resource) => (state, action) => {
-        if(resource !== state.resource) return state;
-        return next(resource)(state, action);
-    };
-
-    const increment_transducer = (next) => (resource) => (state = module_identity(resource, { 'number': 0 }), action) => {
+(function({ rc: { Provider, module_identity, propagate, attach, transducer, resource_filter } }, { createStore }, m){
+    const increment_transducer = (next) => (resource) => (state = null, action) => {
+        if(state === null) return module_identity(resource, { 'number': 0 });
         switch(action.type){
             case 'INCREMENT':
                 return {
@@ -55,13 +51,13 @@ assert.not_equals = (a, b) => assert(a !== b, assert.format(a, ' not equals to '
     };
 
     const hello_view = {
-        'view': ({ state: { store, provider } }) => {
-            console.log('Hello store chain', store.getChain());
+        'view': ({ state: { store, provider, action }, attrs }) => {
+            console.log('Hello store chain', store.getChain(), attrs);
             const state = store.getState();
             return m(
                 'div',
                 [
-                    // m('button', )
+                    // m('button', { 'onclick': action.increment }),
                     m('h1', 'Hello ! (' + state.resource + ') #' + state.id),
                     m(provider.AnchorGroup, { store, provider })
                 ]
@@ -72,14 +68,24 @@ assert.not_equals = (a, b) => assert(a !== b, assert.format(a, ' not equals to '
     // assert.not_equals(app_view, provider.component());
     // assert.equals(app_view, provider.component(new class Store { getState(){ return { 'resource': 'App' } } }));
 
-    const hello_action_creators = () => {
+    const hello_action_creator = (scope, action) => ({
+        'increment': action((state) => ({
+                'type': 'INCREMENT'
+            })
+        )(scope.self),
 
-    };
+        'attach': action.attach((state) => ({
+                resource: 'Hello',
+                initial_state: { number: 10 }
+            })
+        )(scope.self)
+    });
+
     provider.connect_component('Hello', hello_view);
     // assert.not_equals(hello_view, provider.component());
     // assert.equals(hello_view, provider.component(new class Store { getState(){ return { 'resource': 'Hello' } } }));
 
-    provider.connect_transducers([ propagate_transducer, resource_filter_transducer, attach_transducer, increment_transducer ]);
+    provider.connect_transducers([ propagate, resource_filter, attach, increment_transducer ]);
     // assert.equals(provider.reducer('App')(undefined, { type: 'INCREMENT' }).number, 1);
     // assert.equals(typeof provider.reducer('App')(undefined, { type: 'INCREMENT', reduce: () => false }).number, 'undefined');
     const hello_state = {
@@ -105,6 +111,7 @@ assert.not_equals = (a, b) => assert(a !== b, assert.format(a, ' not equals to '
         ],
         id: "jw3r0qya"
     };
+
     const store = createStore(
         provider.reducer('App'),
         app_state
