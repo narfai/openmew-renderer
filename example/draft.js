@@ -17,7 +17,7 @@ assert.format = (...args) => JSON.stringify([...args]);
 assert.equals = (a, b) => assert(a === b, assert.format(a, ' equals to ', b));
 assert.not_equals = (a, b) => assert(a !== b, assert.format(a, ' not equals to ', b));
 
-(function({ draft: { Provider, module_identity, propagate_transducer, attach_transducer } }, { createStore }, m){
+(function({ rc: { Provider, module_identity, propagate_transducer, attach_transducer } }, { createStore }, m){
     const resource_filter_transducer = (next) => (resource) => (state, action) => {
         if(resource !== state.resource) return state;
         return next(resource)(state, action);
@@ -68,10 +68,13 @@ assert.not_equals = (a, b) => assert(a !== b, assert.format(a, ' not equals to '
             );
         }
     };
-    provider.connect_component('App', app_view);
+    provider.connect_component('App', app_view, );
     // assert.not_equals(app_view, provider.component());
     // assert.equals(app_view, provider.component(new class Store { getState(){ return { 'resource': 'App' } } }));
 
+    const hello_action_creators = () => {
+
+    };
     provider.connect_component('Hello', hello_view);
     // assert.not_equals(hello_view, provider.component());
     // assert.equals(hello_view, provider.component(new class Store { getState(){ return { 'resource': 'Hello' } } }));
@@ -79,27 +82,37 @@ assert.not_equals = (a, b) => assert(a !== b, assert.format(a, ' not equals to '
     provider.connect_transducers([ propagate_transducer, resource_filter_transducer, attach_transducer, increment_transducer ]);
     // assert.equals(provider.reducer('App')(undefined, { type: 'INCREMENT' }).number, 1);
     // assert.equals(typeof provider.reducer('App')(undefined, { type: 'INCREMENT', reduce: () => false }).number, 'undefined');
-
+    const hello_state = {
+        'resource': "Hello",
+        'children': [
+            {
+                'resource': "Hello",
+                'children': [],
+                'id': 'boulhahaha2'
+            },
+            {
+                'resource': "App",
+                'children': [],
+                'id': 'boulhahaha3'
+            }
+        ],
+        'id': 'boulhahaha'
+    };
+    const app_state = {
+        resource: "App",
+        children: [
+            hello_state
+        ],
+        id: "jw3r0qya"
+    };
     const store = createStore(
         provider.reducer('App'),
-        {
-            resource: "App",
-            children: [
-                {
-                    'resource': "Hello",
-                    'children': [
-                        {
-                            'resource': "Hello",
-                            'children': [],
-                            'id': 'boulhahaha2'
-                        }
-                    ],
-                    'id': 'boulhahaha'
-                }
-            ],
-            id: "jw3r0qya"
-        }
+        app_state
     );
+    // const store = createStore(
+    //     provider.reducer('Hello'),
+    //     hello_state
+    // );
     //
     // store.replaceReducer(provider.reducer('App'));
 

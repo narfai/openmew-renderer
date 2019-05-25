@@ -11,4 +11,4 @@ export { Anchor, AnchorGroup, NamedAnchorGroup } from './mithril_component';
 export { Action, Spread } from './state/action';
 export { attach_middleware, detach_middleware, register_middleware } from './state/middleware';
 export { format } from './format';
-export { draft } from './draft3/draft';
+export { rc } from './rc/rc';
