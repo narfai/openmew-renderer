@@ -17,7 +17,7 @@ assert.format = (...args) => JSON.stringify([...args]);
 assert.equals = (a, b) => assert(a === b, assert.format(a, ' equals to ', b));
 assert.not_equals = (a, b) => assert(a !== b, assert.format(a, ' not equals to ', b));
 
-(function({ rc: { Provider, module_identity, attach, state_reducer, resource_filter, detach, logger } }, { createStore }, m){
+(function({ rc: { Provider, module_identity, attach, state_reducer, resource_filter, debug, detach, logger } }, { createStore }, m){
     const increment_transducer = state_reducer((next, state = null, action) => {
         switch(action.type){
             case 'INCREMENT':
@@ -100,7 +100,7 @@ assert.not_equals = (a, b) => assert(a !== b, assert.format(a, ' not equals to '
     // assert.not_equals(hello_view, provider.component());
     // assert.equals(hello_view, provider.component(new class Store { getState(){ return { 'resource': 'Hello' } } }));
 
-    provider.connect_transducers([ logger, detach, attach, increment_transducer ]);
+    provider.connect_transducers([ logger, debug('DETACH REDUCER', detach), attach, increment_transducer ]);
     // provider.connect_transducers([ resource_filter('App'), increment_transducer ]);
     // provider.connect_transducers([ resource_filter('Hello'),  ]);
     // assert.equals(provider.reducer('App')(undefined, { type: 'INCREMENT' }).number, 1);

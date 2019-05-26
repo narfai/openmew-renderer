@@ -89,7 +89,7 @@ export const propagate = state_reducer(function propagate_reducer(next, state = 
 
 export const attach = state_reducer((next, state = null, action = {}) =>
     ((next_state) => (
-        action.type === 'ATTACH_MODULE' && allow_reduction(state, action)
+        action.type === 'ATTACH_MODULE'
             ? {
                 ...next_state,
                 'children': [
@@ -105,10 +105,10 @@ export const attach = state_reducer((next, state = null, action = {}) =>
 export const detach = state_reducer((next, state = null, action = {}) =>
     ((next_state) => {
         return (
-            action.type === 'DETACH_MODULE' && allow_reduction(state, action)
+            action.type === 'DETACH_MODULE'
                 ? {
                     ...next_state,
-                    'children': next_state.children.filter(({ id }) => id === action.id)
+                    'children': next_state.children.filter(({ id }) => id !== action.id)
                 }
                 : next_state
             );

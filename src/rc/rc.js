@@ -1,6 +1,6 @@
 import uniqid from 'uniqid';
 
-import { module_identity, propagate, attach, detach, state_reducer, resource_filter, logger } from './state';
+import { module_identity, propagate, attach, detach, state_reducer, resource_filter, debug, logger } from './state';
 import { component, controller, anchor, anchor_group } from './render';
 
 const compose = (...farray) => (...args) =>
@@ -45,6 +45,7 @@ export const rc = {
     module_identity,
     attach,
     detach,
+    debug,
     state_reducer,
     resource_filter,
     logger
