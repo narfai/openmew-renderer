@@ -5,7 +5,7 @@ export const anchor = (mithril) => ({
     'oninit': function({ 'attrs': { store, provider }}){
         this.component = provider.component(store);
     },
-    'view': ({ state, attrs }) => mithril(
+    'view': ({ state }) => mithril(
         'div',
         [
             mithril(
@@ -60,7 +60,6 @@ export const dispatcher = (store) => (action_creator) => (event = {}) => {
 };
 
 export const controller = (filter_resource) => (provider, action_creator = null) => (next) => (store) => {
-    // console.log(filter_resource, provider, action_creator, next, store);
     const next_component = next(store);
     if(store === null || filter_resource !== store.getState().resource) return next_component;
 
@@ -83,4 +82,12 @@ export const controller = (filter_resource) => (provider, action_creator = null)
             if(oninit !== null) oninit.call(this, vnode);
         }
     };
+};
+
+export const redraw_middleware = (mithril) => (redux_store) => (next) => (action) => {
+    const result = next(action);
+    if(typeof action.redraw !== 'undefined' && action.redraw){
+        mithril.redraw();
+    }
+    return result;
 };

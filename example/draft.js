@@ -17,7 +17,7 @@ assert.format = (...args) => JSON.stringify([...args]);
 assert.equals = (a, b) => assert(a === b, assert.format(a, ' equals to ', b));
 assert.not_equals = (a, b) => assert(a !== b, assert.format(a, ' not equals to ', b));
 
-(function({ rc: { Provider, module_identity, attach, state_reducer, resource_filter, debug, detach, logger } }, { createStore }, m){
+(function({ rc: { Provider, module_identity, attach, state_reducer, resource_filter, debug, detach, logger, redraw_middleware } }, { createStore, applyMiddleware }, m){
     const increment_transducer = state_reducer((next, state = null, action) => {
         switch(action.type){
             case 'INCREMENT':
@@ -133,11 +133,11 @@ assert.not_equals = (a, b) => assert(a !== b, assert.format(a, ' not equals to '
 
     const store = createStore(
         provider.reducer, //NOTICE <= is combinable inside subkeys but ...
-        app_state
-        //TODO redraw middleware
+        app_state,
+        applyMiddleware(redraw_middleware(m))
     );
     // const store = createStore(
-    //     provider.reducer('Hello'),
+    //     provider.reducer,
     //     hello_state
     // );
     //
@@ -149,8 +149,8 @@ assert.not_equals = (a, b) => assert(a !== b, assert.format(a, ' not equals to '
     ); //NOTICE ... <= Store wrapper with proper subkey selection have to be selected there
 
     store.subscribe(() => {
-        console.log('redraw on state', store.getState());
-        m.redraw();
+        console.log('state', store.getState());
+        // m.redraw();
     });
     // console.log(store.getState(), stat);
 })(OpenMewRenderer, Redux, m);

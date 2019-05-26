@@ -1,7 +1,7 @@
 import uniqid from 'uniqid';
 
 import { module_identity, propagate, attach, detach, state_reducer, resource_filter, debug, logger } from './state';
-import { component, controller, anchor, anchor_group } from './render';
+import { component, controller, anchor, anchor_group, redraw_middleware } from './render';
 
 const compose = (...farray) => (...args) =>
     farray.reduce(
@@ -48,13 +48,6 @@ export const rc = {
     debug,
     state_reducer,
     resource_filter,
-    logger
+    logger,
+    redraw_middleware
 };
-
-/**
-new provider
- + initial_state => new store
-    + resource, component, action_creators, transducers => new resource
-        render
-
-**/
