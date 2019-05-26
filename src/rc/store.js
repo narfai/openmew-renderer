@@ -1,28 +1,27 @@
 export class Store {
-    constructor({ store, id = null, select = null }){
+    constructor({ store, select = null }){
         this.store = store;
         this.select = select;
-        this.chain = store instanceof Store
-            ? store.getChain()
-            : id === null
-                ? []
-                : [id]
+
+        const { id, resource } = this.getState();
+        this.id = id;
+        this.resource = resource;
+        this.chain = typeof store.chain === 'undefined'
+            ? [this.id]
+            : [...store.chain, this.id]
         ;
+        // this.id = id;
+        // this.resource = resource;
     }
 
-    getId(){
-        const [ id ] = this.getChain().slice(-1);
-        return id;
-    }
-
-    getChain(){
-        return (
-            ({ id = null }) =>
-                id === null
-                    ? [ ...this.chain ]
-                    : [ ...this.chain, id]
-        )(this.getState());
-    }
+    // getChain(){
+    //     return (
+    //         ({ id = null }) =>
+    //             id === null
+    //                 ? [ ...this.chain ]
+    //                 : [ ...this.chain, id]
+    //     )(this.getState());
+    // }
 
     getState(){
         let state = this.store.getState();
@@ -38,7 +37,6 @@ export class Store {
 
     static child_store(child_id, store){
         return new Store({
-            'id': store.getState().id,
             store,
             'select': ({children = []}) =>
                 children.find(

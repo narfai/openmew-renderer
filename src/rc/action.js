@@ -1,82 +1,138 @@
-const renderer_action_creators = ({ id, chain }) => ({
-    'attach': ({ resource, consumer_state }) => ({
-        'type': 'ATTACH_MODULE',
-        resource,
-        consumer_state,
-        'parent': id,
-        'chain': [...chain, this.id]
-    })
-});
+const compose = (...farray) => (...args) =>
+    farray.reduce(
+        (accumulator, current) => current(accumulator),
+        ...args
+    );
 
-export const scope = {
-    'self': (store) => (action) => ({
-        ...action,
-        'propagate': (state) => store.getChain().indexOf(state.id) !== -1,
-        'reduce': (state) => state.id === store.getId()
-    }),
-    'chain': (store) => (action) => ({
-        ...action,
-        'propagate': (state) => store.getChain().indexOf(state.id) !== -1
-    }),
-    'parent': (store) => (action) => ({}),
-    'resource': (store) => (action) => ({}),
-    'custom': (store) => (action) => ({}),
-    'global': (store) => (action) => ({})
+const pipe = (...farray) => compose(...farray.reverse());
+
+const transducer = {
+    propagate: (allow_propagate) => (next) => (action) => (
+            (next_action) => ({
+                ...next_action,
+                'propagate':
+                    (state) => typeof next_action.propagate === 'undefined'
+                        ? allow_propagate(state)
+                        : next_action.propagate(state) || allow_propagate(state)
+            })
+        )(next(action))
+    ,
+    reduce: (allow_reduce) => (next) => (action) => (
+            (next_action) => ({
+                ...next_action,
+                'reduce':
+                    (state) => typeof next_action.reduce === 'undefined'
+                        ? allow_reduce(state)
+                        : next_action.reduce(state) || allow_reduce(state)
+            })
+        )(next(action)),
+    redraw: (allow_render) => (next) => (action) => (
+            (next_action) => ({
+                ...next_action,
+                'redraw': allow_render()
+            })
+        )(next(action)),
 };
 
-export class ScopeSpreader {
-    static self(creator){
-        return (store) => ScopeSpreader.global(() => {
-            const w = creator();
-            w.propagate = (state) => store.getChain().indexOf(state.id) !== -1;
-            w.reduce = (state) => state.id === store.id;
-            return w;
-        })(store);
-    }
+const allow = {
+    self: (store) => (state) => state.id === store.id,
+    chain: (store) => (state) => store.chain.indexOf(state.id) !== -1,
+    parent: (store) => (state) =>
+            store.chain.length > 1
+                ? store.chain[store.chain.length-2] === state.id
+                : false
+        ,
+    resource: (resource) => (state) => state.resource === resource,
+    self_resource: (store) => (state) => store.resource === state.resource,
+    custom: (allow_func) => (store) => (state) => allow_func(store, state)
+};
 
-    static chain(creator){
-        return (store) => ScopeSpreader.global(() => {
-            const w = creator();
-            w.propagate = (state) => store.getChain().indexOf(state.id) !== -1;
-            return w;
-        })(store);
+const scope = {
+    create: (...transducers) => (store) => pipe(
+        ...transducers.map(
+            (extern_transducer) =>
+                extern_transducer(store)({ allow, transducer })
+            )
+    ),
+    self: (store) => pipe(
+            transducer.propagate(allow.chain(store)),
+            transducer.reduce(allow.self(store))
+        )
+    ,
+    chain: (store) => pipe(
+            transducer.propagate(allow.chain(store))
+            //reduce all
+        )
+    ,
+    parent: (store) => pipe(
+            transducer.propagate(allow.chain(store)),
+            transducer.reduce(allow.parent(store))
+        )
+    ,
+    resource: (resource) => () => pipe(
+            //propagate all
+            transducer.reduce(allow.resource(resource))
+        ),
+    self_resource: (store) => pipe(
+            //propagate all
+            transducer.reduce(allow.self_resource(store))
+        ),
+    global: (/*store*/) => (next) => (action = {}) => {
+        if(typeof action.propagate !== 'undefined') delete action.propagate;
+        if(typeof action.reduce !== 'undefined') delete action.reduce;
+        return next(action);
     }
+};
 
-    static parent(creator){
-        return (store) => ScopeSpreader.global(() => {
-            const chain = store.getChain();
-            const w = creator();
-            const parentId = chain.length > 1 ? chain[chain.length-2] : null;
-            w.propagate = (state) => chain.indexOf(state.id) !== -1;
-            w.reduce = (state) => state.id === parentId;
-            return w;
-        })(store);
-    }
+const redraw = {
+    allow: (/*store*/) => pipe(
+        transducer.redraw(() => true)
+    ),
+    deny: (/*store*/) => pipe(
+        transducer.redraw(() => false)
+    )
+};
 
-    static resource(resource, creator){ //TODO Try it
-        return (store) => ScopeSpreader.global(() => {
-            const w = creator();
-            w.reduce = (state) => state.resource === resource;
-            return w;
-        })(store);
-    }
-
-    static custom(creator, reduce = null, propagate = null){
-        return (store) => ScopeSpreader.global(() => {
-            const w = creator();
-            if(reduce) w.reduce = reduce;
-            if(propagate) w.propagate = propagate;
-            return w;
-        })(store);
-    }
-
-    static global(creator){
-        return (store) => (e = {}) => {
-            e.redraw = false;
-            const action = creator(e);
-            action.store_id = store.id;
-            e.dispatch_result = store.dispatch(action);
-            return e;
-        };
-    }
+const action_creator_identity = (/*state*/) => ({});
+export function spread(action_creator = action_creator_identity){
+    return (...scopes) => (store) =>
+        pipe(
+            ...scopes
+                .filter((selected_transducer) => typeof selected_transducer === 'function')
+                .map((selected_transducer) => selected_transducer(store))
+        )(action_creator);
 }
+
+const spreadable = (action_identity) => (action_creator) => (...scopes) =>
+    spread(
+        (state) => action_identity(action_creator(state))
+    )(...scopes);
+
+spread.scope = scope;
+spread.redraw = redraw;
+const attach_identity = ({ resource, initial_state = {} }) => ({
+    'type': 'ATTACH_MODULE',
+    resource,
+    initial_state
+});
+
+spread.attach = spreadable(attach_identity);
+
+const detach_identity = ({ id }) => ({
+    'type': 'DETACH_MODULE',
+    id
+});
+
+spread.detach = spreadable(detach_identity);
+
+export const action_collection = (action_creator, dispatcher) => (
+        (user_actions) => Object
+            .keys(user_actions)
+            .reduce(
+                (accumulator, current) => {
+                    accumulator[current] = dispatcher(user_actions[current]);
+                    return accumulator;
+                },
+            {})
+    )(action_creator(spread))
+;

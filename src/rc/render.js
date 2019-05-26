@@ -1,48 +1,40 @@
 import { Store } from './store';
+import { spread, action_collection } from './action';
 
 export const anchor = (mithril) => ({
     'oninit': function({ 'attrs': { store, provider }}){
         this.component = provider.component(store);
-        this.getState = () => store.getState();
     },
-    'view': ({ state, attrs }) => {
-        return mithril(
-            'div',
-            [
-                mithril(
-                    state.component,
-                    {
-                        'anchor': { ...attrs },
-                        'state': state.getState()
-                    }
-                )
-            ]
-        );
-    }
+    'view': ({ state, attrs }) => mithril(
+        'div',
+        [
+            mithril(
+                state.component
+            )
+        ]
+    )
 });
 
 export const anchor_group = (mithril) => ({
     'oninit': function({ 'attrs': { provider }}){
         const stores = {};
-        this.attributes = (id, store) => {
-            return ({
+        this.attributes = (id, store) => ({
                 provider,
                 'store': stores.hasOwnProperty(id)
                     ? stores[id]
                     : stores[id] = Store.child_store(id, store)
-            });
-        };
+            })
+        ;
     },
-    'view': ({ 'state': { attributes }, 'attrs': { store, provider, filterFn = () => true, wrapper = null }}) => {
-        return store.getState().children
+    'view': ({ 'state': { attributes }, 'attrs': { store, provider, filterFn = () => true, wrapper = null }}) =>
+        store.getState().children
             .filter((child_state) => filterFn(child_state))
-            .map(({id}) => wrapper !== null
-                ? mithril(wrapper, {'key': id}, [mithril(provider.Anchor, attributes(id, store))])
-                : mithril(provider.Anchor, attributes(id, store))
-            );
-    }
+            .map(
+                ({id}) => wrapper !== null
+                    ? mithril(wrapper, {'key': id}, [mithril(provider.Anchor, attributes(id, store))])
+                    : mithril(provider.Anchor, attributes(id, store))
+            )
 });
-
 
 export const component = (filter_resource) => (item) => (next) => (store = null) => {
         const next_component = next(store);
@@ -52,16 +44,23 @@ export const component = (filter_resource) => (item) => (next) => (store = null)
         return filter_resource === resource
             ? item
             : next_component;
-    }
-;
+};
 
+export const dispatcher = (store) => (action_creator) => (event = {}) => {
+    event.id = store.id;
+    event.resource = store.resource;
+    event.redraw = false;
+    event.result = store.dispatch(
+        action_creator(store)({
+            event,
+            'state': store.getState()
+        })
+    );
+    return event;
+};
 
-import { ScopeSpreader } from './action';
-
-
-const action_creator_identity = (/*scope*/) => {};
-
-export const controller = (filter_resource) => (provider, action_creator = action_creator_identity()) => (next) => (store) => {
+export const controller = (filter_resource) => (provider, action_creator = null) => (next) => (store) => {
+    // console.log(filter_resource, provider, action_creator, next, store);
     const next_component = next(store);
     if(store === null || filter_resource !== store.getState().resource) return next_component;
 
@@ -73,12 +72,14 @@ export const controller = (filter_resource) => (provider, action_creator = actio
             this.provider = provider;
             this.store = store instanceof Store
                 ? store
-                : new Store({ store });
+                : new Store({ store, 'resource': filter_resource });
 
-            // this.action = {
-            //     ...action_creator(ScopeSpreader)
-            // };
-
+            if(action_creator !== null){
+                this.action = action_collection(
+                    action_creator,
+                    dispatcher(store)
+                );
+            }
             if(oninit !== null) oninit.call(this, vnode);
         }
     };

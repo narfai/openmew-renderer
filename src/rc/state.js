@@ -1,67 +1,123 @@
 import uniqid from 'uniqid';
 
+//TODO proper functional exposable tools pipe & compose
+//TODO proper class with statics
+export const state_reducer = (reducer_resource) =>
+    (next) =>
+        (state, action) =>
+            reducer_resource(next, state, action); //TODO generic transducer def
 
-export const transducer = (reducer) => (next) => (resource) => (state, action) => reducer(next, resource, state, action);
-
-export const module_identity = (resource, consumer_state = {}) => ({
+export const module_identity = (resource, initial_state = {}) => ({
     resource,
     'children': [],
-    ...consumer_state,
+    ...initial_state,
     'id': uniqid()
 });
 
-function allow_propagation(state, action){
-    return (typeof action.propagate === 'undefined' || action.propagate(state) === true);
-}
+const allow_propagation =
+        (state, action) =>
+            typeof action.propagate === 'undefined'
+                || action.propagate(state) === true
+;
 
-function allow_reduction(state, action){
-    return (typeof action.reduce === 'undefined' || action.reduce(state) === true);
-}
+const allow_reduction =
+        (state, action) =>
+            typeof action.reduce === 'undefined'
+               || action.reduce(state) === true
+;
 
-export const propagate = (next) => (resource) => (state = null, action) => {
-    if(state === null) return module_identity(resource);
+const is_structural =
+        (state, action) =>
+            typeof action.structural === 'boolean'
+                && action.structural
+                    && allow_propagation(state, action);
 
-    const propagate_states = state.children.filter((subState) => allow_propagation(subState, action) === true);
+export const debug = (name, transducer) => state_reducer((next, state = null, action = {}) => {
+    console.group(name);
+    console.info(action.type);
+    console.log('dispatching', action);
+    console.log('state', state);
+    const next_state = transducer(next)(state, action);
+    console.log('next_state', state);
+    console.log('propagate to', state.children.filter(
+        (subState) => allow_propagation(subState, action) === true
+    ).map(({ id }) => id));
+    console.log('reduction allowed', allow_reduction(state, action));
+    console.groupEnd();
+
+    return next_state;
+});
+export const logger = state_reducer((next, state = null, action = {}) => {
+    console.group(action.type);
+    console.info('dispatching', action);
+    console.log('state', state);
+    const next_state = next(state, action);
+    console.log('next state', next_state);
+    console.log('propagated', next_state.children !== state.children);
+    console.log('reducted', next_state !== state);
+    console.groupEnd();
+    return next_state;
+});
+
+//NOTICE Propagate endorse both roles of recursive Enumerator and Accumulator
+export const propagate = state_reducer(function propagate_reducer(next, state = null, action = {}){
+    const propagate_ids = state.children.filter(//NOTICE propagation statement use old state ...
+        (subState) => allow_propagation(subState, action) === true
+    ).map(({ id }) => id);
+
     const allow = allow_reduction(state, action);
 
-    if(allow === false && propagate.length === 0) return state;
+    if(allow === false && propagate_ids.length === 0) return state;
+    const next_state = (
+        allow === true
+            ? next(state, action)
+            : state
+    );
 
-    const next_state = next(resource)(state, action);
     return {
         ...next_state,
-        resource,
         'children': next_state.children
             .map((subState) =>
-                propagate_states.includes(subState)
-                    ? next(subState.resource)(subState, action)
-                    : subState
+                //NOTICE ... So a newly created child cannot be reduced with same action
+                propagate_ids.includes(subState.id)
+                    ? propagate_reducer(next, subState, action)
+                    : subState //NOTICE ... but its state will bubble up the tree
             )
 
     };
-};
+});
 
-export const attach = (next) => (resource) => (state = null, action) => {
-    if(state === null) return module_identity(resource);
-
-    switch(action.type){
-        case 'ATTACH_MODULE':
-            return ((next_state) => ({
+export const attach = state_reducer((next, state = null, action = {}) =>
+    ((next_state) => (
+        action.type === 'ATTACH_MODULE' && allow_reduction(state, action)
+            ? {
                 ...next_state,
                 'children': [
                     ...next_state.children,
-                    {
-                        'resource': action.resource,
-                        'children': [],
-                        ...next_state.consumer_state
-                    }
+                    module_identity(action.resource, action.initial_state)
                 ]
-            }))(next(resource)(state, action));
-        default:
-            return next(resource)(state, action);
-    }
-};
+            }
+            : next_state
+        )
+    )(next(state, action))
+);
 
-export const resource_filter = (next) => (resource) => (state, action) => {
-    if(resource !== state.resource) return state;
-    return next(resource)(state, action);
-};
+export const detach = state_reducer((next, state = null, action = {}) =>
+    ((next_state) => {
+        return (
+            action.type === 'DETACH_MODULE' && allow_reduction(state, action)
+                ? {
+                    ...next_state,
+                    'children': next_state.children.filter(({ id }) => id === action.id)
+                }
+                : next_state
+            );
+        }
+    )(next(state, action))
+);
+
+export const resource_filter = (...resources) => state_reducer((next, state, action = {}) =>
+    resources.includes(state.resource)
+        ? state
+        : next(state, action)
+);
