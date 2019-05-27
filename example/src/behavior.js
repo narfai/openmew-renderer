@@ -10,7 +10,7 @@
 
 class Behavior {}
 
-(function({ Provider, Renderer, Identity, ActionCreator }) {
+(function({ Provider, Renderer, Identity }) {
     //State behaviors
     Behavior.increment_transducer = Identity.state_reducer((next, state = null, action) => {
         //@NOTICE state is guaranteed to respect interface { id, resource, children }
@@ -42,21 +42,21 @@ class Behavior {}
     //Built-in behavior
 
     Behavior.attach_creator = (spread) => ({
-        'attach': spread.attach(
+        'prepend_self': spread.prepend(
             ({state, event}) => ({//@NOTICE you also can edit `event.redraw = true` for redrawing mithril way
                 resource: state.resource,
                 initial_state: {number: 10}
             })
         )(spread.scope.self, spread.redraw.allow)//@NOTICE action transducers can be crafted, combined or defined infinitely
         ,
-        'attach_hello': spread.attach(//@NOTICE spread object also contains builtin action creator like attach or detach
+        'prepend_hello': spread.prepend(//@NOTICE spread object also contains builtin action creator like attach or detach
             ({state, event}) => ({
                 resource: 'Hello',
                 initial_state: {number: 10}
             })
         )(spread.scope.self, spread.redraw.allow)
         ,
-        'attach_app': spread.attach(
+        'append_app': spread.append(
             ({state, event}) => ({
                 resource: 'App',
                 initial_state: {number: 10}

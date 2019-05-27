@@ -7,14 +7,50 @@
  *
  */
 
-export const ATTACH_MODULE = 'ATTACH_MODULE';
+import { Functional } from '../functional';
+import { Scope } from './scope';
+import { ActionTransducer } from './transducer';
+
+export const APPEND_MODULE = 'APPEND_MODULE';
+export const PREPREND_MODULE = 'PREPREND_MODULE';
 export const DETACH_MODULE = 'DETACH_MODULE';
 export const SWITCH_VIEWSET = 'SWITCH_VIEWSET';
 
+
+const action_creator_identity = (/*state*/) => ({/*action*/});
+
+function spread(action_creator = action_creator_identity){
+    return (...scopes) => (store) =>
+        Functional.pipe(
+            ...scopes
+                .filter((selected_transducer) => typeof selected_transducer === 'function')
+                .map((selected_transducer) => selected_transducer(store))
+        )(action_creator);
+}
+
+spread.scope = Scope;
+spread.redraw = {
+    allow: (/*store*/) => Functional.pipe(
+        ActionTransducer.redraw(() => true)
+    ),
+    deny: (/*store*/) => Functional.pipe(
+        ActionTransducer.redraw(() => false)
+    )
+};
+
+
 export class ActionCreator {
-    static attach({ resource, initial_state = {} }){
+    static append({ resource, initial_state = {} }){
         return {
-            'type': ATTACH_MODULE,
+            'type': APPEND_MODULE,
+            resource,
+            initial_state
+        };
+    }
+
+    static prepend({ resource, initial_state = {} }){
+        return {
+            'type': PREPREND_MODULE,
             resource,
             initial_state
         };
@@ -41,4 +77,30 @@ export class ActionCreator {
             {/*action_collection*/}
         );
     }
+
+    static action_collection(action_creator, dispatcher) {
+        return (
+            (user_actions) => Object
+                .keys(user_actions)
+                .reduce(
+                    (accumulator, current) => {
+                        accumulator[current] = dispatcher(user_actions[current]);
+                        return accumulator;
+                    },
+                {})
+        )(action_creator(spread));
+    }
+
+    static spreadable(action_identity) {
+        return (action_creator) => (...scopes) =>
+            spread(
+                (state) => action_identity(action_creator(state))
+            )(...scopes)
+        ;
+    }
 }
+
+spread.append = ActionCreator.spreadable(ActionCreator.append);
+spread.prepend = ActionCreator.spreadable(ActionCreator.prepend);
+spread.detach = ActionCreator.spreadable(ActionCreator.detach);
+spread.switch = ActionCreator.spreadable(ActionCreator.switch);

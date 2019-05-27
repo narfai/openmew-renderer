@@ -9,14 +9,12 @@
  */
 
 import { Store } from '../state';
-import { action_collection } from '../action/spread';
 import { ActionCreator } from '../action/creator';
 import { DEFAULT_VIEWSET, resource_identity } from './identity';
 
 export class Renderer {
     static dispatcher(store){
         return (action_creator) => (event = {}) => {
-            console.log('ACTION TRIGGERED');
             event.id = store.id;
             event.resource = store.resource;
             event.redraw = false; //@NOTICE prevent mithril from redrawing on view events
@@ -76,8 +74,7 @@ export class Renderer {
                 'oninit': function(vnode){
                     if(action_creators.length !== 0){
 
-                        // console.log('INIT action creators', ac);
-                        this.action = action_collection(
+                        this.action = ActionCreator.action_collection(
                             ActionCreator.combine_creators(...action_creators),
                             Renderer.dispatcher(this.store)
                         );

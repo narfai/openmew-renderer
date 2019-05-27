@@ -16,7 +16,7 @@ class View {}
         //NOTICE: transducers use mithril state to give capabilities
         //store / provider / action comes from controller builtin tranducer
         //store_state comes from optional state_aware_component tranducer
-        'view': ({state: { store, provider, action, store_state, viewset }}) =>
+        'view': ({state: { store, provider, action = {}, store_state, viewset }}) =>
             m(
                 'div',
                 [
@@ -24,9 +24,6 @@ class View {}
                         'h1',
                         'App ! (' + store_state.resource + ' / viewset ' + viewset + ') #' + store_state.id + ' number ' + store_state.number,
                         [
-                            m('button', {'onclick': action.attach}, 'ATTACH'),
-                            m('button', {'onclick': action.attach_hello}, 'ATTACH HELLO'),
-                            m('button', {'onclick': action.attach_app}, 'ATTACH APP'),
                             ...Object.keys(action).map(
                                 (key) => m('button', {key, 'onclick': action[key]}, key)
                             )
