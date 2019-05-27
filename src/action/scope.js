@@ -21,6 +21,13 @@ export class Scope {
         );
     }
 
+    static none(store){
+        return Functional.pipe(
+            ActionTransducer.propagate(Allow.none),
+            ActionTransducer.reduce(Allow.none)
+        );
+    }
+
     static self(store){
         return Functional.pipe(
             ActionTransducer.propagate(Allow.chain(store)),
@@ -53,6 +60,13 @@ export class Scope {
         return Functional.pipe(
             //propagate all
             ActionTransducer.reduce(Allow.self_resource(store))
+        );
+    }
+
+    static root(store){
+        return Functional.pipe(
+            ActionTransducer.propagate(Allow.root(store)),
+            ActionTransducer.reduce(Allow.root(store)),
         );
     }
 

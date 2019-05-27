@@ -7,7 +7,8 @@
  *
  */
 
-export { Renderer } from './render';
+export { Renderer, Component, resource_identity, DEFAULT_VIEWSET, Middleware } from './render';
 export { Identity, Store, Structural, Utility } from './state';
 export { Provider } from './provider';
 export { Functional } from './functional';
+export { ActionCreator } from './action/creator';

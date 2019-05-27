@@ -16,29 +16,34 @@ class View {}
         //NOTICE: transducers use mithril state to give capabilities
         //store / provider / action comes from controller builtin tranducer
         //store_state comes from optional state_aware_component tranducer
-        'view': ({state: { store, provider, action, store_state }}) =>
+        'view': ({state: { store, provider, action, store_state, viewset }}) =>
             m(
                 'div',
                 [
                     m(
                         'h1',
-                        'App ! (' + store_state.resource + ') #' + store_state.id + ' number ' + store_state.number,
+                        'App ! (' + store_state.resource + ' / viewset ' + viewset + ') #' + store_state.id + ' number ' + store_state.number,
                         [
-                            m('button', {'onclick': action.attach}, 'STATIC ATTACH'),
-                            m('button', {'onclick': action.attach_hello}, 'STATIC ATTACH HELLO'),
-                            m('button', {'onclick': action.attach_app}, 'STATIC ATTACH APP'),
+                            m('button', {'onclick': action.attach}, 'ATTACH'),
+                            m('button', {'onclick': action.attach_hello}, 'ATTACH HELLO'),
+                            m('button', {'onclick': action.attach_app}, 'ATTACH APP'),
+                            ...Object.keys(action).map(
+                                (key) => m('button', {key, 'onclick': action[key]}, key)
+                            )
                         ]
                     ),
                     m(
                         'ul',
-                        m(provider.AnchorGroup, {store, provider, wrapper: 'li'})
+                        //@NOTICE if you use viewset, you have to propagate it through anchors
+                        //If you dont, children will fallback to default
+                        m(provider.AnchorGroup, {store, provider, viewset, wrapper: 'li'})
                     )
                 ]
             )
     };
 
     View.hello_view = {
-        'view': ({state: {store, provider, action, store_state }}) =>
+        'view': ({state: {store, provider, action, store_state, viewset }}) =>
             m(
                 'div',
                 [
@@ -46,12 +51,32 @@ class View {}
                         'h1',
                         'Hello ! (' + store_state.resource + ') #' + store_state.id + ' number ' + store_state.number,
                         Object.keys(action).map(
-                            (key) => m('button', {key, 'onclick': action[key]}, 'DYNAMIC ' + key.toUpperCase())
+                            (key) => m('button', {key, 'onclick': action[key]}, key)
                         )
                     ),
                     m(
                         'ul',
-                        m(provider.AnchorGroup, {store, provider, wrapper: 'li'})
+                        m(provider.AnchorGroup, {store, provider, viewset, wrapper: 'li'})
+                    )
+                ]
+            )
+    };
+
+    View.hello_alternate_view = {
+        'view': ({state: { store, provider, action, store_state, viewset }}) =>
+            m(
+                'div',
+                [
+                    m(
+                        'h1',
+                        'Alternate hello ! (' + store_state.resource + ') #' + store_state.id + ' number ' + store_state.number,
+                        Object.keys(action).map(
+                            (key) => m('button', {key, 'onclick': action[key]}, key)
+                        )
+                    ),
+                    m(
+                        'ul',
+                        m(provider.AnchorGroup, {store, provider, viewset, wrapper: 'li'})
                     )
                 ]
             )
