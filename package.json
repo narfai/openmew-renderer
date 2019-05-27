@@ -1,6 +1,6 @@
 {
   "name": "openmew-renderer",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "OpenMew library which is able to render Mithril/Redux based components recursively",
   "main": "dist/openmew-renderer.js",
   "repository": "https://github.com/narfai/openmew-renderer.git",
