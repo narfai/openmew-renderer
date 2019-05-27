@@ -17,8 +17,8 @@ assert.format = (...args) => JSON.stringify([...args]);
 assert.equals = (a, b) => assert(a === b, assert.format(a, ' equals to ', b));
 assert.not_equals = (a, b) => assert(a !== b, assert.format(a, ' not equals to ', b));
 
-(function({ rc: { Provider, module_identity, attach, state_reducer, resource_filter, debug, detach, logger, redraw_middleware } }, { createStore, applyMiddleware }, m){
-    const increment_transducer = state_reducer((next, state = null, action) => {
+(function({ Provider, Renderer, Identity, Structural, Utility }, { createStore, applyMiddleware }, m){
+    const increment_transducer = Identity.state_reducer((next, state = null, action) => {
         switch(action.type){
             case 'INCREMENT':
                 return {
@@ -36,14 +36,26 @@ assert.not_equals = (a, b) => assert(a !== b, assert.format(a, ' not equals to '
     const provider = new Provider(m, 'App');
 
     const app_view = {
-        'view': ({ state: { store, provider } }) => {
-            // console.log('App store chain', store.id, store.chain);
+        'view': ({ state: { store, provider, action} }) => {
+            const state = store.getState();
             return m(
                 'div',
                 [
-                    // m('button', )
-                    m('h1', 'App !'),
-                    m(provider.AnchorGroup, { store, provider })
+                    m(
+                        'h1',
+                        'App ! (' + state.resource + ') #' + state.id + ' number ' + state.number,
+                        [
+                            m('button', { 'onclick': action.increment }, 'INCREMENT'),
+                            m('button', { 'onclick': action.attach }, 'ATTACH'),
+                            m('button', { 'onclick': action.attach_hello }, 'ATTACH HELLO'),
+                            m('button', { 'onclick': action.attach_app }, 'ATTACH APP'),
+                            m('button', { 'onclick': action.detach }, 'DETACH'), //@NOTICE you cannot detach root component
+                        ]
+                    ),
+                    m(
+                        'ul',
+                        m(provider.AnchorGroup, { store, provider, wrapper: 'li' })
+                    )
                 ]
             );
         }
@@ -51,10 +63,7 @@ assert.not_equals = (a, b) => assert(a !== b, assert.format(a, ' not equals to '
 
     const hello_view = {
         'view': ({ state: { store, provider, action }}) => {
-            // console.log('Hello store chain', store.id, store.chain);
             const state = store.getState();
-            // console.log('Hello store chain', store.id, store.chain);
-            // console.log('increment', action.increment());
             return m(
                 'div',
                 [
@@ -64,6 +73,8 @@ assert.not_equals = (a, b) => assert(a !== b, assert.format(a, ' not equals to '
                         [
                             m('button', { 'onclick': action.increment }, 'INCREMENT'),
                             m('button', { 'onclick': action.attach }, 'ATTACH'),
+                            m('button', { 'onclick': action.attach_hello }, 'ATTACH HELLO'),
+                            m('button', { 'onclick': action.attach_app }, 'ATTACH APP'),
                             m('button', { 'onclick': action.detach }, 'DETACH'),
                         ]
                     ),
@@ -75,11 +86,8 @@ assert.not_equals = (a, b) => assert(a !== b, assert.format(a, ' not equals to '
             );
         }
     };
-    provider.connect_component('App', app_view);
-    // assert.not_equals(app_view, provider.component());
-    // assert.equals(app_view, provider.component(new class Store { getState(){ return { 'resource': 'App' } } }));
 
-    const hello_action_creator = (spread) => ({
+    const action_creator = (spread) => ({
         'increment': spread(
             () => ({ 'type': 'INCREMENT'})
         )(spread.scope.self, spread.redraw.allow)
@@ -89,38 +97,50 @@ assert.not_equals = (a, b) => assert(a !== b, assert.format(a, ' not equals to '
                 resource: state.resource,
                 initial_state: { number: 10 }
             })
-        )(spread.scope.self)
+        )(spread.scope.self, spread.redraw.allow)
+        ,
+        'attach_hello': spread.attach(
+            ({ state, event }) => ({
+                resource: 'Hello',
+                initial_state: { number: 10 }
+            })
+        )(spread.scope.self, spread.redraw.allow)
+        ,
+        'attach_app': spread.attach(
+            ({ state, event }) => ({
+                resource: 'App',
+                initial_state: { number: 10 }
+            })
+        )(spread.scope.self, spread.redraw.allow)
         ,
         'detach': spread.detach(
             ({ state: { id }, event }) => ({ id })
         )(spread.scope.parent, spread.redraw.allow)
     });
 
-    provider.connect_component('Hello', hello_view, hello_action_creator);
-    // assert.not_equals(hello_view, provider.component());
-    // assert.equals(hello_view, provider.component(new class Store { getState(){ return { 'resource': 'Hello' } } }));
+    const { logger, debug } = Utility;
+    const { detach, attach } = Structural;
 
-    provider.connect_transducers([ logger, debug('DETACH REDUCER', detach), attach, increment_transducer ]);
-    // provider.connect_transducers([ resource_filter('App'), increment_transducer ]);
-    // provider.connect_transducers([ resource_filter('Hello'),  ]);
-    // assert.equals(provider.reducer('App')(undefined, { type: 'INCREMENT' }).number, 1);
-    // assert.equals(typeof provider.reducer('App')(undefined, { type: 'INCREMENT', reduce: () => false }).number, 'undefined');
+    provider.connect_component('App', app_view, action_creator);
+    provider.connect_component('Hello', hello_view, action_creator);
+    provider.connect_transducers([ logger, debug(detach, 'DETACH REDUCER'), attach, increment_transducer ]);
+
     const hello_state = {
         'resource': "Hello",
         'children': [
             {
                 'resource': "Hello",
                 'children': [],
-                'id': 'boulhahaha2',
+                'id': 'jw3r0qze',
                 'number': 0
             },
             {
                 'resource': "App",
                 'children': [],
-                'id': 'boulhahaha3'
+                'id': 'jw3r0qdb'
             }
         ],
-        'id': 'boulhahaha',
+        'id': 'jw3r0qza',
         'number': 18
     };
     const app_state = {
@@ -133,8 +153,8 @@ assert.not_equals = (a, b) => assert(a !== b, assert.format(a, ' not equals to '
 
     const store = createStore(
         provider.reducer, //NOTICE <= is combinable inside subkeys but ...
-        app_state,
-        applyMiddleware(redraw_middleware(m))
+        // undefined,// app_state,
+        applyMiddleware(Renderer.redraw_middleware(m))
     );
     // const store = createStore(
     //     provider.reducer,

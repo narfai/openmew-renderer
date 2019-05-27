@@ -62,50 +62,5 @@ var web_prod = {
     'performance': { 'hints': 'error' }
 };
 
-// var nw_dev = {
-//     'mode': 'development',
-//     'target': 'node-webkit',
-//     'devtool': 'inline-source-map',
-//     'entry': { 'app': './src/index.js' },
-//     'module': {
-//         'rules': [
-//             {
-//                 'test': /\.js$/,
-//                 'use': [ { 'loader': 'babel-loader' } ]
-//             }
-//         ]
-//     },
-//     'output': {
-//         'path': path.resolve(__dirname, 'dist'),
-//         'filename': 'openmew-renderer.nw.js',
-//         'libraryTarget': 'umd',
-//         'library': 'OpenMewRenderer'
-//     },
-//     'performance': { 'hints': false }
-// };
-//
-// var nw_prod = {
-//     'mode': 'production',
-//     'target': 'node-webkit',
-//     'devtool': 'none',
-//     'entry': { 'app': './src/index.js' },
-//     'module': {
-//         'rules': [
-//             {
-//                 'test': /\.js$/,
-//                 'use': [ { 'loader': 'babel-loader' } ]
-//             }
-//         ]
-//     },
-//     'output': {
-//         'path': path.resolve(__dirname, 'dist'),
-//         'filename': 'openmew-renderer.nw.min.js',
-//         'libraryTarget': 'umd',
-//         'library': 'OpenMewRenderer'
-//
-//     },
-//     'performance': { 'hints': 'warning' }
-// };
-
 
 module.exports = [ web_dev, web_prod ];

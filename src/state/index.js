@@ -7,6 +7,7 @@
  *
  */
 
-export { Renderer } from './render';
-export { Identity, Store, Structural, Utility } from './state';
-export { Provider } from './provider';
+export { Identity } from './identity';
+export { Structural } from './structural';
+export { Utility } from './utility';
+export { Store } from './store';

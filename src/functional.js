@@ -7,6 +7,15 @@
  *
  */
 
-export { Renderer } from './render';
-export { Identity, Store, Structural, Utility } from './state';
-export { Provider } from './provider';
+export const compose = (...farray) => (...args) =>
+    farray.reduce(
+        (accumulator, current) => current(accumulator),
+        ...args
+    );
+
+export const pipe = (...farray) => compose(...farray.reverse());
+
+export default {
+    compose,
+    pipe
+};
