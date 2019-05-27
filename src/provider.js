@@ -8,7 +8,7 @@
  */
 import { Identity, Structural } from './state';
 import { Renderer } from './render';
-import {compose, pipe} from './functional';
+import { Functional } from './functional';
 
 const chain_reducer = Symbol('chain_reducer');
 export class Provider {
@@ -28,14 +28,20 @@ export class Provider {
     }
 
     connect_component(resource, component_resource, ...action_creators){
-        this.component = compose(
+        this.component = Functional.compose(
             Renderer.component(resource)(component_resource),
             Renderer.controller(resource)(this, action_creators)
         )(this.component);
     }
 
-    connect_transducers(state_transducers){
-        this[chain_reducer] = pipe(
+    connect_component_transducers(...component_transducers){
+        this.component = Functional.compose(
+            ...component_transducers
+        )(this.component);
+    }
+
+    connect_state_transducers(...state_transducers){
+        this[chain_reducer] = Functional.pipe(
             ...state_transducers
         )(this[chain_reducer]);
     }

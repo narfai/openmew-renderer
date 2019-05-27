@@ -35,7 +35,7 @@ const app_state = {
 };
 
 (function(
-    { Provider, Renderer, Identity, Structural, Utility },
+    { Provider, Renderer, Identity, Structural, Utility, Functional },
     { createStore, applyMiddleware },
     m,
     View,
@@ -63,12 +63,28 @@ const app_state = {
     const { detach, attach } = Structural;
 
     //@NOTICE[2] you can attach as much state transducers you want to a resource, anytime, order matter ...
-    provider.connect_transducers([
+    provider.connect_state_transducers(
         logger,
         debug(detach, 'DETACH REDUCER'), //@NOTICE you easily can debug the I/O of a state transducer with debug
         attach,
         Behavior.increment_transducer
-    ]);
+    );
+
+    //@NOTICE you can attach as much global component transducers you want, anytime, order matter ....
+    //Those transducers will be used at dynamic component creation
+    //giving abilities to generated components
+    provider.connect_component_transducers(
+        Renderer.debug_redraw_choice(//@NOTICE this tranducer allow debug of redraw evalutin choice by a transducer
+            Functional.pipe( //Order matter
+                //@NOTICE this transducer provide `vnode.state.store_state` to component's view
+                Renderer.state_aware_component,
+                //@NOTICE this transducer optimize by preventing mithril to evaluate redraws of unchanged components
+                //according to the state tree
+                Renderer.skip_redraw_component,
+            )
+        )
+
+    );
 
     const store = createStore(
         provider.reducer, //@NOTICE[3] <= produced reducer is combinable with Redux.combinerReducers but ...
@@ -96,5 +112,3 @@ const app_state = {
         // m.redraw();
     });
 })(OpenMewRenderer, Redux, m, View, Behavior);
-
-//TODO onbeforeupdate + update *OPTIONAL* optimization
