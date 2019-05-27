@@ -90,14 +90,11 @@ const app_state = {
 
     store.subscribe(() => {
         console.log('state', store.getState());
-        // m.redraw(); //@NOTICE for debugging or tiny project convenience, it could be usefull to always redraw
+        // @NOTICE for debugging or tiny project convenience,
+        // it could be usefull to always redraw after a state change
+        // ( but you have to disable the more consice redraw_middleware )
+        // m.redraw();
     });
 })(OpenMewRenderer, Redux, m, View, Behavior);
 
 //TODO onbeforeupdate + update *OPTIONAL* optimization
-/***
- * As Library consumer, i can attach action creators with spreading to vnode.state ( provide id / chain at rendering ? )
- * As Library consumer, i can access local store state through vnode
- * As Library consumer, i can put anchors in views in order to display recursively instances of registered resources
- * As Library consumer, i must be able to load an existing previous state
-  */
