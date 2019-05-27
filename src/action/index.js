@@ -54,3 +54,10 @@ export const action_collection = (action_creator, dispatcher) => (
                 {})
     )(action_creator(spread))
 ;
+
+
+export const combine_creators = (action_creators = []) =>
+    (lazy_spread) => action_creators.reduce(
+        (acc, cur) => ({...acc, ...cur(lazy_spread)}),
+        {/*action_collection*/}
+    );

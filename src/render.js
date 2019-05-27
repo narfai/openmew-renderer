@@ -8,7 +8,7 @@
  */
 
 import { Store } from './state';
-import { action_collection } from './action/index';
+import { action_collection, combine_creators } from './action/index';
 
 export class Renderer {
     static anchor(mithril){
@@ -79,7 +79,7 @@ export class Renderer {
     }
 
     static controller(filter_resource){
-        return (provider, action_creator = null) => (next) => (store) => {
+        return (provider, action_creators = []) => (next) => (store) => {
             const next_component = next(store);
             if(store === null || filter_resource !== store.getState().resource) return next_component;
 
@@ -93,12 +93,13 @@ export class Renderer {
                         ? store
                         : new Store({ store, 'resource': filter_resource });
 
-                    if(action_creator !== null){
+                    if(action_creators.length !== 0){
                         this.action = action_collection(
-                            action_creator,
+                            combine_creators(action_creators),
                             Renderer.dispatcher(this.store)
                         );
                     }
+
                     if(oninit !== null) oninit.call(this, vnode);
                 }
             };

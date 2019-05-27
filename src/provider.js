@@ -27,7 +27,7 @@ export class Provider {
         this.AnchorGroup = Renderer.anchor_group(mithril);
     }
 
-    connect_component(resource, component_resource, action_creators){
+    connect_component(resource, component_resource, ...action_creators){
         this.component = compose(
             Renderer.component(resource)(component_resource),
             Renderer.controller(resource)(this, action_creators)

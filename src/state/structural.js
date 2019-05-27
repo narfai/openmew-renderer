@@ -13,12 +13,12 @@ import { Identity } from './identity';
 export class Structural {}
 //@NOTICE Propagate endorse both roles of recursive Enumerator and Accumulator
 Structural.propagate = Identity.state_reducer(function propagate_reducer(next, state = null, action = {}){
-    //@NOTICE decisions are also made with old state here
+    //@NOTICE[1] decisions are also made with old state here ...
     const propagate_ids = state.children.filter(
         (subState) => Identity.allow_propagation(subState, action) === true
     ).map(({ id }) => id);
 
-    //@NOTICE And here
+    //@NOTICE[1]... And here ...
     const allow = Identity.allow_reduction(state, action);
 
     if(allow === false && propagate_ids.length === 0) return state;
@@ -32,11 +32,11 @@ Structural.propagate = Identity.state_reducer(function propagate_reducer(next, s
         ...next_state,
         'children': next_state.children
             .map((subState) =>
-                //@NOTICE ... So a newly created child cannot be reduced with same action
+                //@NOTICE[1]... So a newly created child cannot be reduced with same action
                 // ( which is good because it avoid recursion errors )
                 propagate_ids.includes(subState.id)
                     ? propagate_reducer(next, subState, action)
-                    : subState //@NOTICE ... but its state will bubble up the tree
+                    : subState //@NOTICE[1]... but its state still bubble up the tree
             )
     };
 });
