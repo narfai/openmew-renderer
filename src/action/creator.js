@@ -71,14 +71,14 @@ export class ActionCreator {
         };
     }
 
-    static combine_creators(...action_creators) {
+    static combine_creators(...action_creators){
         return (lazy_spread) => action_creators.reduce(
             (acc, cur) => ({...acc, ...cur(lazy_spread)}),
             {/*action_collection*/}
         );
     }
 
-    static action_collection(action_creator, dispatcher) {
+    static action_collection(action_creator, dispatcher){
         return (
             (user_actions) => Object
                 .keys(user_actions)
@@ -91,7 +91,7 @@ export class ActionCreator {
         )(action_creator(spread));
     }
 
-    static spreadable(action_identity) {
+    static spreadable(action_identity){
         return (action_creator) => (...scopes) =>
             spread(
                 (state) => action_identity(action_creator(state))

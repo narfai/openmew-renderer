@@ -16,7 +16,7 @@ export class Identity {
                 reducer_resource(next, state, action);
     }
 
-    static module_identity(resource, initial_state = {}){
+    static module(resource, initial_state = {}){
         return {
             resource,
             'children': [],

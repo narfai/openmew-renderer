@@ -57,7 +57,7 @@ const attach = (type, children_reducer) => Identity.state_reducer(
 Structural.prepend = attach(
     PREPREND_MODULE,
     (state, action) => [
-        Identity.module_identity(action.resource, action.initial_state),
+        Identity.module(action.resource, action.initial_state),
         ...state.children
     ]
 );
@@ -66,7 +66,7 @@ Structural.append = attach(
     APPEND_MODULE,
     (state, action) => [
         ...state.children,
-        Identity.module_identity(action.resource, action.initial_state)
+        Identity.module(action.resource, action.initial_state)
     ]
 );
 

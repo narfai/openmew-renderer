@@ -22,7 +22,7 @@ export class Provider {
             (state, action) => this[chain_reducer](state, action)
         );
         this.reducer = (
-            state = Identity.module_identity(initial_resource, initial_state), action
+            state = Identity.module(initial_resource, initial_state), action
         ) => propagate_reducer(state, action);
 
 

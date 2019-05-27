@@ -13,7 +13,7 @@ export class Allow {
     }
 
     static root(store){
-        return (state) => store.chain.length === 1;
+        return (/*state*/) => store.chain.length === 1;
     }
 
     static self(store){
