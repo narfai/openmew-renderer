@@ -35,7 +35,9 @@ const app_state = {
 };
 
 (function(
-    { Provider, Renderer, Middleware, Identity, Structural, Utility, Functional, ActionCreator },
+    // @NOTICE Only the provider is really required
+    // Other dependencies are exposed for extended use or convenience purpose
+    { Provider, Renderer, Middleware, Structural, Utility, Functional, ActionCreator },
     { createStore, applyMiddleware },
     m,
     View,
