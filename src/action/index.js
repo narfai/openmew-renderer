@@ -7,7 +7,7 @@
  *
  */
 
-import { pipe } from '../functional';
+import { Functional } from '../functional';
 import { Scope } from './scope';
 import { ActionTransducer } from './transducer';
 import { ActionCreator } from './creator';
@@ -16,7 +16,7 @@ const action_creator_identity = (/*state*/) => ({/*action*/});
 
 export function spread(action_creator = action_creator_identity){
     return (...scopes) => (store) =>
-        pipe(
+        Functional.pipe(
             ...scopes
                 .filter((selected_transducer) => typeof selected_transducer === 'function')
                 .map((selected_transducer) => selected_transducer(store))
@@ -25,10 +25,10 @@ export function spread(action_creator = action_creator_identity){
 
 spread.scope = Scope;
 spread.redraw = {
-    allow: (/*store*/) => pipe(
+    allow: (/*store*/) => Functional.pipe(
         ActionTransducer.redraw(() => true)
     ),
-    deny: (/*store*/) => pipe(
+    deny: (/*store*/) => Functional.pipe(
         ActionTransducer.redraw(() => false)
     )
 };

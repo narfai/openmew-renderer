@@ -9,11 +9,11 @@
 
 import { Allow } from './allow';
 import { ActionTransducer } from './transducer';
-import { pipe } from '../functional';
+import { Functional } from '../functional';
 
 export class Scope {
     static create(...transducers){
-        return (store) => pipe(
+        return (store) => Functional.pipe(
             ...transducers.map(
                 (extern_transducer) =>
                     extern_transducer(store)({ Allow, ActionTransducer })
@@ -22,35 +22,35 @@ export class Scope {
     }
 
     static self(store){
-        return pipe(
+        return Functional.pipe(
             ActionTransducer.propagate(Allow.chain(store)),
             ActionTransducer.reduce(Allow.self(store))
         );
     }
 
     static chain(store){
-        return pipe(
+        return Functional.pipe(
             ActionTransducer.propagate(Allow.chain(store))
             //reduce all
         );
     }
 
     static parent(store){
-        return pipe(
+        return Functional.pipe(
             ActionTransducer.propagate(Allow.chain(store)),
             ActionTransducer.reduce(Allow.parent(store))
         );
     }
 
     static resource(resource){
-        return () => pipe(
+        return () => Functional.pipe(
             //propagate all
             ActionTransducer.reduce(Allow.resource(resource))
         );
     }
 
     static self_resource(store){
-        return pipe(
+        return Functional.pipe(
             //propagate all
             ActionTransducer.reduce(Allow.self_resource(store))
         );

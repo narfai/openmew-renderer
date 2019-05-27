@@ -13,14 +13,16 @@ class View {}
 (function(m){
     // https://mithril.js.org/hyperscript.html
     View.app_view = {
-        'view': ({state: {store, provider, action}}) => {
-            const state = store.getState();
-            return m(
+        //NOTICE: transducers use mithril state to give capabilities
+        //store / provider / action comes from controller builtin tranducer
+        //store_state comes from optional state_aware_component tranducer
+        'view': ({state: { store, provider, action, store_state }}) =>
+            m(
                 'div',
                 [
                     m(
                         'h1',
-                        'App ! (' + state.resource + ') #' + state.id + ' number ' + state.number,
+                        'App ! (' + store_state.resource + ') #' + store_state.id + ' number ' + store_state.number,
                         [
                             m('button', {'onclick': action.attach}, 'STATIC ATTACH'),
                             m('button', {'onclick': action.attach_hello}, 'STATIC ATTACH HELLO'),
@@ -32,19 +34,17 @@ class View {}
                         m(provider.AnchorGroup, {store, provider, wrapper: 'li'})
                     )
                 ]
-            );
-        }
+            )
     };
 
     View.hello_view = {
-        'view': ({state: {store, provider, action}}) => {
-            const state = store.getState();
-            return m(
+        'view': ({state: {store, provider, action, store_state }}) =>
+            m(
                 'div',
                 [
                     m(
                         'h1',
-                        'Hello ! (' + state.resource + ') #' + state.id + ' number ' + state.number,
+                        'Hello ! (' + store_state.resource + ') #' + store_state.id + ' number ' + store_state.number,
                         Object.keys(action).map(
                             (key) => m('button', {key, 'onclick': action[key]}, 'DYNAMIC ' + key.toUpperCase())
                         )
@@ -54,8 +54,7 @@ class View {}
                         m(provider.AnchorGroup, {store, provider, wrapper: 'li'})
                     )
                 ]
-            );
-        }
+            )
     };
 
 })(m);

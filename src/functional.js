@@ -7,33 +7,38 @@
  *
  */
 
-export const compose = (...farray) => (...args) =>
-    farray.reduce(
-        (accumulator, current) => current(accumulator),
-        ...args
-    );
-
-export const pipe = (...farray) => compose(...farray.reverse());
-
-const stats = {
-    'success': 0,
-    'failed': 0
-};
-
-export function assert(a, message = assert.format(a, ' is true')){
-    if(a === true){
-        stats.success += 1;
-        return;
+export class Functional {
+    static compose(...farray){
+        return (...args) =>
+            farray.reduce(
+                (accumulator, current) => current(accumulator),
+                ...args
+            );
     }
-    stats.failed += 1;
-    throw new Error('Fail to assert that ' + message);
-}
-assert.format = (...args) => JSON.stringify([...args]);
-assert.equals = (a, b) => assert(a === b, assert.format(a, ' equals to ', b));
-assert.not_equals = (a, b) => assert(a !== b, assert.format(a, ' not equals to ', b));
-assert.stats = () => console.log(stats);
 
-export default {
-    compose,
-    pipe
-};
+    static pipe(...farray){
+        return Functional.compose(...farray.reverse());
+    }
+
+    static asserter(){
+        const stats = {
+            'success': 0,
+            'failed': 0
+        };
+
+        function assert(a, message = assert.format(a, ' is true')){
+            if(a === true){
+                stats.success += 1;
+                return;
+            }
+            stats.failed += 1;
+            throw new Error('Fail to assert that ' + message);
+        }
+        assert.format = (...args) => JSON.stringify([...args]);
+        assert.equals = (a, b) => assert(a === b, assert.format(a, ' equals to ', b));
+        assert.not_equals = (a, b) => assert(a !== b, assert.format(a, ' not equals to ', b));
+        assert.stats = () => stats;
+
+        return assert;
+    }
+}

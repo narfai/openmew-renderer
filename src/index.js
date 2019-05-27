@@ -10,3 +10,4 @@
 export { Renderer } from './render';
 export { Identity, Store, Structural, Utility } from './state';
 export { Provider } from './provider';
+export { Functional } from './functional';

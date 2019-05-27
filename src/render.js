@@ -51,18 +51,6 @@ export class Renderer {
         };
     }
 
-    static component(filter_resource){
-        return (item) => (next) => (store = null) => {
-            const next_component = next(store);
-            if(store === null || filter_resource !== store.getState().resource) return next_component;
-
-            const { resource } = store.getState();
-            return filter_resource === resource
-                ? item
-                : next_component;
-        };
-    }
-
     static dispatcher(store){
         return (action_creator) => (event = {}) => {
             event.id = store.id;
@@ -75,6 +63,18 @@ export class Renderer {
                 })
             );
             return event;
+        };
+    }
+
+    static component(filter_resource){
+        return (item) => (next) => (store = null) => {
+            const next_component = next(store);
+            if(store === null || filter_resource !== store.getState().resource) return next_component;
+
+            const { resource } = store.getState();
+            return filter_resource === resource
+                ? item
+                : next_component;
         };
     }
 
@@ -101,6 +101,83 @@ export class Renderer {
                     }
 
                     if(oninit !== null) oninit.call(this, vnode);
+                }
+            };
+        };
+    }
+
+    static debug_redraw_choice(component_transducer){
+        return (next) => (store) => {
+            const next_component = component_transducer(next)(store);
+
+            const { onbeforeupdate = null } = next_component;
+
+            return {
+                ...next_component,
+                'onbeforeupdate': function(vnode, old_vnode){
+                    console.groupCollapsed('DEBUG REDRAW CHOICE ' + this.store.id);
+                    const choice = (onbeforeupdate !== null)
+                        ? onbeforeupdate.call(this, vnode, old_vnode)
+                        : true;
+
+                    console.log('redraw evaluation ?', choice);
+                    console.log('old vnode', old_vnode);
+                    console.log('new vnode', vnode);
+                    console.groupEnd();
+                    return choice;
+                }
+            };
+        };
+    }
+
+    static skip_redraw_component(next){
+        return (store) => {
+            const next_component = next(store);
+
+            const { onbeforeupdate = null } = next_component;
+
+            return {
+                ...next_component,
+                'onbeforeupdate': function(vnode, old_vnode){
+                    if(typeof old_vnode.state.store_state === 'undefined'){
+                        throw new Error('Did you forget to pipe state_aware_component transducer ? ');
+                    }
+                    return old_vnode.state.store_state !== this.store.getState()
+                            || (
+                                (onbeforeupdate !== null)
+                                    && onbeforeupdate.call(this, vnode, old_vnode)
+                            )
+                    ;
+                }
+            };
+        };
+    }
+
+    static state_aware_component(next){
+        return (store) => {
+            const next_component = next(store);
+
+            const {
+                onbeforeupdate = null,
+                oninit = null
+            } = next_component;
+
+            return {
+                ...next_component,
+                'oninit': function(vnode){
+                    if(oninit !== null) oninit.call(this, vnode);
+                    if(typeof this.store === 'undefined'){
+                        throw new Error('Did you forget to pipe controller transducer ? ');
+                    }
+                    this.store_state = this.store.getState();
+                },
+                'onbeforeupdate': function(vnode, old_vnode){
+                    const choice = (onbeforeupdate !== null)
+                        ? onbeforeupdate.call(this, vnode, old_vnode)
+                        : true;
+
+                    this.store_state = this.store.getState();
+                    return choice;
                 }
             };
         };
