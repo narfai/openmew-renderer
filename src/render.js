@@ -67,15 +67,10 @@ export class Renderer {
     }
 
     static component(filter_resource){
-        return (item) => (next) => (store = null) => {
-            const next_component = next(store);
-            if(store === null || filter_resource !== store.getState().resource) return next_component;
-
-            const { resource } = store.getState();
-            return filter_resource === resource
+        return (item) => (next) => (store = null) =>
+            (store !== null && filter_resource === store.getState().resource)
                 ? item
-                : next_component;
-        };
+                : next(store);
     }
 
     static controller(filter_resource){
@@ -91,7 +86,7 @@ export class Renderer {
                     this.provider = provider;
                     this.store = store instanceof Store
                         ? store
-                        : new Store({ store, 'resource': filter_resource });
+                        : new Store({ store });
 
                     if(action_creators.length !== 0){
                         this.action = action_collection(
@@ -166,10 +161,9 @@ export class Renderer {
                 ...next_component,
                 'oninit': function(vnode){
                     if(oninit !== null) oninit.call(this, vnode);
-                    if(typeof this.store === 'undefined'){
-                        throw new Error('Did you forget to pipe controller transducer ? ');
+                    if(typeof this.store !== 'undefined'){
+                        this.store_state = this.store.getState();
                     }
-                    this.store_state = this.store.getState();
                 },
                 'onbeforeupdate': function(vnode, old_vnode){
                     const choice = (onbeforeupdate !== null)
