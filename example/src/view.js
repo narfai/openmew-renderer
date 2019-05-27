@@ -45,7 +45,7 @@ class View {}
                     m(
                         'h1',
                         'Hello ! (' + state.resource + ') #' + state.id + ' number ' + state.number,
-                        ...Object.keys(action).map(
+                        Object.keys(action).map(
                             (key) => m('button', {key, 'onclick': action[key]}, 'DYNAMIC ' + key.toUpperCase())
                         )
                     ),
