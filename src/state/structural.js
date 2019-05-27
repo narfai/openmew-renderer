@@ -8,6 +8,7 @@
  */
 
 import { Identity } from './identity';
+import { ATTACH_MODULE, DETACH_MODULE } from '../action/creator';
 
 export class Structural {}
 //@NOTICE Propagate endorse both roles of recursive Enumerator and Accumulator
@@ -43,7 +44,7 @@ Structural.propagate = Identity.state_reducer(function propagate_reducer(next, s
 Structural.attach = Identity.state_reducer(
     (next, state = null, action = {}) =>
         ((next_state) => (
-                action.type === 'ATTACH_MODULE'
+                action.type === ATTACH_MODULE
                     ? {
                         ...next_state,
                         'children': [
@@ -59,7 +60,7 @@ Structural.attach = Identity.state_reducer(
 Structural.detach = Identity.state_reducer((next, state = null, action = {}) =>
     ((next_state) => {
             return (
-                action.type === 'DETACH_MODULE'
+                action.type === DETACH_MODULE
                     ? {
                         ...next_state,
                         'children': next_state.children.filter(({ id }) => id !== action.id)

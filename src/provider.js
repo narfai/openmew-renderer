@@ -7,7 +7,7 @@
  *
  */
 import { Identity, Structural } from './state';
-import { Renderer } from './render';
+import { Renderer, Component } from './render';
 import { Functional } from './functional';
 
 const chain_reducer = Symbol('chain_reducer');
@@ -21,16 +21,16 @@ export class Provider {
             state = Identity.module_identity(initial_resource, initial_state), action
         ) => propagate_reducer(state, action);
 
-        this.component = (/*query_store*/) => ({ 'view': () => mithril('#') });
+        this.component = (/*query_store, viewset = null*/) => ({ 'view': () => mithril('#') });
 
-        this.Anchor = Renderer.anchor(mithril);
-        this.AnchorGroup = Renderer.anchor_group(mithril);
+        this.Anchor = Component.anchor(mithril);
+        this.AnchorGroup = Component.anchor_group(mithril);
     }
 
     connect_component(resource, component_resource, ...action_creators){
         this.component = Functional.compose(
             Renderer.component(resource)(component_resource),
-            Renderer.controller(resource)(this, action_creators)
+            Renderer.controller(this, action_creators)
         )(this.component);
     }
 

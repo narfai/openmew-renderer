@@ -67,6 +67,16 @@ class Behavior {}
     Behavior.detach_creator = (spread) => ({
         'detach': spread.detach(
             ({state: {id}, event}) => ({id})
-        )(spread.scope.parent, spread.redraw.allow)
+        )(spread.scope.parent, spread.redraw.allow)//@NOTICE parent scope : you have to ask parent to remove the child
     });
+
+    Behavior.switch_creator = (spread) => ({
+        'switch_default': spread.switch(
+            () => ({ 'viewset': null }) //Default viewset
+        )(spread.scope.root),
+        'switch_alternate': spread.switch(
+            () => ({ 'viewset': 'Alternate' })
+        )(spread.scope.root),
+    });
+
 })(OpenMewRenderer);

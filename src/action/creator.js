@@ -7,10 +7,14 @@
  *
  */
 
+export const ATTACH_MODULE = 'ATTACH_MODULE';
+export const DETACH_MODULE = 'DETACH_MODULE';
+export const SWITCH_VIEWSET = 'SWITCH_VIEWSET';
+
 export class ActionCreator {
     static attach({ resource, initial_state = {} }){
         return {
-            'type': 'ATTACH_MODULE',
+            'type': ATTACH_MODULE,
             resource,
             initial_state
         };
@@ -18,8 +22,16 @@ export class ActionCreator {
 
     static detach({ id }){
         return {
-            'type': 'DETACH_MODULE',
+            'type': DETACH_MODULE,
             id
+        };
+    }
+
+    static switch(arg = { viewset: null, select: null }){
+        return {
+            'type': SWITCH_VIEWSET,
+            'viewset': arg.viewset || null,
+            'select': arg.select || null
         };
     }
 }

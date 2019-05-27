@@ -1,3 +1,4 @@
+
 /*
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -7,55 +8,19 @@
  *
  */
 
-import { Store } from './state';
-import { action_collection, combine_creators } from './action/index';
+import { Store } from '../state';
+import { action_collection, combine_creators } from '../action/spread';
+import { DEFAULT_VIEWSET, resource_identity } from './identity';
 
 export class Renderer {
-    static anchor(mithril){
-        const component = Symbol('component');
-        return {
-            'oninit': function({ 'attrs': { store, provider }}){
-                this[component] = provider.component(store);
-            },
-            'view': ({ state }) => mithril(
-                'div',
-                [
-                    mithril(
-                        state[component]
-                    )
-                ]
-            )
-        };
-    }
-
-    static anchor_group(mithril){
-        const attributes = Symbol('attributes');
-        return {
-            'oninit': function({ 'attrs': { provider }}){
-                const stores = {};
-                this[attributes] = (id, store) => ({
-                    provider,
-                    'store': stores.hasOwnProperty(id)
-                        ? stores[id]
-                        : stores[id] = Store.child_store(id, store)
-                });
-            },
-            'view': ({ state, 'attrs': { store, provider, filterFn = () => true, wrapper = null }}) =>
-                store.getState().children
-                    .filter((child_state) => filterFn(child_state))
-                    .map(
-                        ({id}) => wrapper !== null
-                            ? mithril(wrapper, {'key': id}, [mithril(provider.Anchor, state[attributes](id, store))])
-                            : mithril(provider.Anchor, state[attributes](id, store))
-                    )
-        };
-    }
-
     static dispatcher(store){
         return (action_creator) => (event = {}) => {
             event.id = store.id;
             event.resource = store.resource;
-            event.redraw = false;
+            event.redraw = false; //@NOTICE prevent mithril from redrawing on view events
+            // redraw is handled by m.redraw() with a middleware instead
+            //https://mithril.js.org/autoredraw.html
+
             event.result = store.dispatch(
                 action_creator(store)({
                     event,
@@ -67,16 +32,26 @@ export class Renderer {
     }
 
     static component(filter_resource){
-        return (item) => (next) => (store = null) =>
-            (store !== null && filter_resource === store.getState().resource)
+        const resource_object = resource_identity.from_string(filter_resource);
+        return (item) => (next) => ({ store = null, viewset = null }) => {
+            return (
+                store !== null
+                && resource_object.name === store.getState().resource
+                && (
+                    resource_identity.allow(resource_object, viewset)
+                    || resource_object.viewset === DEFAULT_VIEWSET
+                )
+            )
                 ? item
-                : next(store);
+                : next({ store, viewset });
+        };
     }
 
-    static controller(filter_resource){
-        return (provider, action_creators = []) => (next) => (store) => {
-            const next_component = next(store);
-            if(store === null || filter_resource !== store.getState().resource) return next_component;
+    //TODO split in 3 : provided_component, resourceful_component (store / viewset), actionable_component
+    static controller(provider, action_creators = []){
+        return (next) => ({ store = null, viewset = null }) => {
+            const next_component = next({ store, viewset });
+            if(store === null) return next_component;
 
             const { oninit = null } = next_component;
 
@@ -87,6 +62,8 @@ export class Renderer {
                     this.store = store instanceof Store
                         ? store
                         : new Store({ store });
+
+                    this.viewset = viewset;
 
                     if(action_creators.length !== 0){
                         this.action = action_collection(
@@ -102,8 +79,8 @@ export class Renderer {
     }
 
     static debug_redraw_choice(component_transducer){
-        return (next) => (store) => {
-            const next_component = component_transducer(next)(store);
+        return (next) => ({ store, viewset = null }) => {
+            const next_component = component_transducer(next)({ store, viewset });
 
             const { onbeforeupdate = null } = next_component;
 
@@ -126,8 +103,8 @@ export class Renderer {
     }
 
     static skip_redraw_component(next){
-        return (store) => {
-            const next_component = next(store);
+        return ({ store, viewset = null }) => {
+            const next_component = next({ store, viewset });
 
             const { onbeforeupdate = null } = next_component;
 
@@ -138,19 +115,19 @@ export class Renderer {
                         throw new Error('Did you forget to pipe state_aware_component transducer ? ');
                     }
                     return old_vnode.state.store_state !== this.store.getState()
-                            || (
-                                (onbeforeupdate !== null)
-                                    && onbeforeupdate.call(this, vnode, old_vnode)
-                            )
-                    ;
+                        || (
+                            (onbeforeupdate !== null)
+                            && onbeforeupdate.call(this, vnode, old_vnode)
+                        )
+                        ;
                 }
             };
         };
     }
 
     static state_aware_component(next){
-        return (store) => {
-            const next_component = next(store);
+        return ({ store, viewset }) => {
+            const next_component = next({ store, viewset });
 
             const {
                 onbeforeupdate = null,
@@ -174,14 +151,6 @@ export class Renderer {
                     return choice;
                 }
             };
-        };
-    }
-
-    static redraw_middleware(mithril){
-        return (/*redux_store*/) => (next) => (action) => {
-            const result = next(action);
-            if(typeof action.redraw !== 'undefined' && action.redraw) mithril.redraw();
-            return result;
         };
     }
 }

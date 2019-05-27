@@ -35,7 +35,7 @@ const app_state = {
 };
 
 (function(
-    { Provider, Renderer, Identity, Structural, Utility, Functional },
+    { Provider, Renderer, Middleware, Identity, Structural, Utility, Functional, ActionCreator },
     { createStore, applyMiddleware },
     m,
     View,
@@ -56,8 +56,13 @@ const app_state = {
         View.hello_view,
         Behavior.attach_creator,
         Behavior.detach_creator,
-        Behavior.increment_creator
+        Behavior.increment_creator,
+        Behavior.switch_creator
     );
+
+    //redux middleware which catch { 'type': VIEWSET_CHANGE, 'viewset': null | String }, craft new component and re-mount with mithril
+    //If a component cannot suite to viewset, default resource is used.
+    //If a component does not have default viewset, error
 
     const { logger, debug } = Utility;
     const { detach, attach } = Structural;
@@ -70,10 +75,19 @@ const app_state = {
         Behavior.increment_transducer
     );
 
+    provider.connect_component(
+        { 'name': 'Hello', 'viewset': 'Alternate' },
+        View.hello_alternate_view,
+        Behavior.attach_creator,
+        Behavior.detach_creator,
+        Behavior.increment_creator,
+        Behavior.switch_creator
+    );
+
     //@NOTICE you can attach as much global component transducers you want, anytime, order matter ....
     //Those transducers will be used at dynamic component creation
     //giving abilities to generated components
-    provider.connect_component_transducers(
+    provider.connect_component_transducers( //TODO should be able to do that any time ( best effort : available at least for all future connect_components)
         Renderer.debug_redraw_choice(//@NOTICE this tranducer allow debug of redraw evalutin choice by a transducer
             Functional.pipe( //Order matter
                 //@NOTICE this transducer provide `vnode.state.store_state` to component's view
@@ -83,24 +97,37 @@ const app_state = {
                 Renderer.skip_redraw_component,
             )
         )
-
     );
 
     const store = createStore(
         provider.reducer, //@NOTICE[3] <= produced reducer is combinable with Redux.combinerReducers but ...
         app_state, //hello_state //@NOTICE <= will also work over any subtree parts ... as long root respect { id, resource, children } interface
-        applyMiddleware(Renderer.redraw_middleware(m))
+        applyMiddleware(
+            Middleware.render_middleware(m, provider, document.getElementById('app')),
+            Middleware.redraw_middleware(m)
+        )
     );
 
     //@NOTICE[2]... if other tranducers are connected after store creation, you can use Redux.replaceReducer fonction
     //provider.connect_transducers(lazy_transducer);
     // store.replaceReducer(provider.reducer);
 
-    m.mount(//@NOTICE you can render the way you want
-        document.getElementById('app'),
-        //NOTICE[3]... <= you have to wrap redux Store with OpenMewRenderer.Store wrapper with proper subkey select function
-        provider.component(store)
-    );
+    // @NOTICE you can render the way you want
+    // m.mount( //Mithril way
+    //     document.getElementById('app'),
+    //     //NOTICE[3]... <= you have to wrap redux Store with OpenMewRenderer.Store wrapper with proper subkey select function
+    //     provider.component({ store, 'viewset': 'Alternate' })
+    // );
+
+
+
+
+    //Redux way with Middleware.render_middleware
+    store.dispatch(ActionCreator.switch());//@NOTICE select default viewset
+
+
+    // store.dispatch(ActionCreator.switch());
+    // store.dispatch(ActionCreator.switch({ 'viewset': 'Alternate' }));
 
     //@NOTICE[1] if you want to register a view after mount you may have to redraw
 
@@ -112,3 +139,7 @@ const app_state = {
         // m.redraw();
     });
 })(OpenMewRenderer, Redux, m, View, Behavior);
+
+
+//TODO may its possible to attach different dom elements to differents resources with same store state tree
+//May it only needs two render middleware registration, or manual m.mounts

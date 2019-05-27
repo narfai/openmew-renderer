@@ -41,7 +41,7 @@ const spreadable = (action_identity) => (action_creator) => (...scopes) =>
 
 spread.attach = spreadable(ActionCreator.attach);
 spread.detach = spreadable(ActionCreator.detach);
-
+spread.switch = spreadable(ActionCreator.switch);
 
 export const action_collection = (action_creator, dispatcher) => (
         (user_actions) => Object

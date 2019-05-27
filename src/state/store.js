@@ -35,6 +35,7 @@ export class Store {
     }
 
     static child_store(child_id, store){
+        if(store === null) throw new Error('Store cannot be null');
         return new Store({
             store,
             'select': ({children = []}) =>

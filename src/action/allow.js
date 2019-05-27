@@ -8,6 +8,14 @@
  */
 
 export class Allow {
+    static none(){
+        return () => false;
+    }
+
+    static root(store){
+        return (state) => store.chain.length === 1;
+    }
+
     static self(store){
         return (state) => state.id === store.id;
     }
