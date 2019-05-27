@@ -31,7 +31,7 @@ export function assert(a, message = assert.format(a, ' is true')){
 assert.format = (...args) => JSON.stringify([...args]);
 assert.equals = (a, b) => assert(a === b, assert.format(a, ' equals to ', b));
 assert.not_equals = (a, b) => assert(a !== b, assert.format(a, ' not equals to ', b));
-assert.stats = console.log(stats);
+assert.stats = () => console.log(stats);
 
 export default {
     compose,
