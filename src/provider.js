@@ -11,8 +11,12 @@ import { Renderer, Component } from './render';
 import { Functional } from './functional';
 
 const chain_reducer = Symbol('chain_reducer');
+const component_reducer = Symbol('component_reducer');
+const controller_reducer = Symbol('controller_reducer');
 export class Provider {
     constructor(mithril, initial_resource, initial_state = {}){
+        // State
+
         this[chain_reducer] = (state) => state;
         const propagate_reducer = Structural.propagate(
             (state, action) => this[chain_reducer](state, action)
@@ -21,23 +25,37 @@ export class Provider {
             state = Identity.module_identity(initial_resource, initial_state), action
         ) => propagate_reducer(state, action);
 
-        this.component = (/*query_store, viewset = null*/) => ({ 'view': () => mithril('#') });
+
+        // Stateful components
+
+        this[component_reducer] = (/*{ query_store, viewset = null }*/) => ({ 'view': () => mithril('h1', 'Resource not found') });
+        this[controller_reducer] = (forward) => this[component_reducer](forward);
+
+        const create_component = Functional.pipe(
+            Renderer.subscriber(this),
+            Renderer.stateful
+        )(({ store, viewset }) => this[controller_reducer]({ store, viewset }));
+
+        this.component = ({ store, viewset }) => create_component({ store, viewset });
+
+
+        // Stateless
 
         this.Anchor = Component.anchor(mithril);
         this.AnchorGroup = Component.anchor_group(mithril);
     }
 
     connect_component(resource, component_resource, ...action_creators){
-        this.component = Functional.compose(
-            Renderer.component(resource)(component_resource),
-            Renderer.controller(this, action_creators)
-        )(this.component);
+        this[component_reducer] = Functional.compose(
+            Renderer.component(resource, component_resource),
+            Renderer.actionable(resource, ...action_creators),
+        )(this[component_reducer]);
     }
 
     connect_component_transducers(...component_transducers){
-        this.component = Functional.compose(
+        this[controller_reducer] = Functional.pipe(
             ...component_transducers
-        )(this.component);
+        )(this[controller_reducer]);
     }
 
     connect_state_transducers(...state_transducers){

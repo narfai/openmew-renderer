@@ -34,4 +34,11 @@ export class ActionCreator {
             'select': arg.select || null
         };
     }
+
+    static combine_creators(...action_creators) {
+        return (lazy_spread) => action_creators.reduce(
+            (acc, cur) => ({...acc, ...cur(lazy_spread)}),
+            {/*action_collection*/}
+        );
+    }
 }

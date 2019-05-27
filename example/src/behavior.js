@@ -10,7 +10,7 @@
 
 class Behavior {}
 
-(function({ Provider, Renderer, Identity }) {
+(function({ Provider, Renderer, Identity, ActionCreator }) {
     //State behaviors
     Behavior.increment_transducer = Identity.state_reducer((next, state = null, action) => {
         //@NOTICE state is guaranteed to respect interface { id, resource, children }

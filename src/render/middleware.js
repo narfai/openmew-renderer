@@ -11,23 +11,17 @@ import { Store } from '../state';
 import { SWITCH_VIEWSET } from '../action/creator';
 
 export class Middleware {
-    static allowed_render(){
-        return [SWITCH_VIEWSET];
-    }
-
-    static redraw_middleware(mithril){
+    static redraw(mithril){
         return (/*redux_store*/) => (next) => (action) => {
-            console.log('ACTION', action);
             const result = next(action);
             if(typeof action.redraw !== 'undefined' && action.redraw) mithril.redraw();
             return result;
         };
     }
 
-    static render_middleware(mithril, provider, root_element){
+    static render(mithril, provider, root_element, allowed = [SWITCH_VIEWSET]){
         return (store) => (next) => (action) => {
-            if(!Middleware.allowed_render().includes(action.type)) next(action);
-
+            if(!allowed.includes(action.type)) return next(action);
             const virtual_store = new Store({ store, select: action.select });
             mithril.mount(root_element, null);
             mithril.mount(root_element, provider.component({
@@ -35,7 +29,9 @@ export class Middleware {
                 'viewset': action.viewset
             }));
 
-            return next(action);
+            next(action);
+
+            return virtual_store;
         };
     }
 }

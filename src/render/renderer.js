@@ -9,12 +9,14 @@
  */
 
 import { Store } from '../state';
-import { action_collection, combine_creators } from '../action/spread';
+import { action_collection } from '../action/spread';
+import { ActionCreator } from '../action/creator';
 import { DEFAULT_VIEWSET, resource_identity } from './identity';
 
 export class Renderer {
     static dispatcher(store){
         return (action_creator) => (event = {}) => {
+            console.log('ACTION TRIGGERED');
             event.id = store.id;
             event.resource = store.resource;
             event.redraw = false; //@NOTICE prevent mithril from redrawing on view events
@@ -31,15 +33,23 @@ export class Renderer {
         };
     }
 
-    static component(filter_resource){
+    static allow_resource_reduction(filter_resource, selected_viewset, state_resource){
         const resource_object = resource_identity.from_string(filter_resource);
-        return (item) => (next) => ({ store = null, viewset = null }) => {
+        return resource_object.name === state_resource
+            && (
+                resource_identity.allow(resource_object, selected_viewset)
+                || resource_object.viewset === DEFAULT_VIEWSET
+            );
+    }
+
+    static component(filter_resource, item){
+        return (next) => ({ store = null, viewset = null }) => {
             return (
                 store !== null
-                && resource_object.name === store.getState().resource
-                && (
-                    resource_identity.allow(resource_object, viewset)
-                    || resource_object.viewset === DEFAULT_VIEWSET
+                && Renderer.allow_resource_reduction(
+                    filter_resource,
+                    viewset,
+                    store.getState().resource
                 )
             )
                 ? item
@@ -47,27 +57,28 @@ export class Renderer {
         };
     }
 
-    //TODO split in 3 : provided_component, resourceful_component (store / viewset), actionable_component
-    static controller(provider, action_creators = []){
+    static actionable(filter_resource, ...action_creators){
         return (next) => ({ store = null, viewset = null }) => {
             const next_component = next({ store, viewset });
-            if(store === null) return next_component;
+            if(
+                store === null
+                || ! Renderer.allow_resource_reduction(
+                    filter_resource,
+                    viewset,
+                    store.getState().resource
+                )
+            ) return next_component;
 
             const { oninit = null } = next_component;
 
             return {
                 ...next_component,
                 'oninit': function(vnode){
-                    this.provider = provider;
-                    this.store = store instanceof Store
-                        ? store
-                        : new Store({ store });
-
-                    this.viewset = viewset;
-
                     if(action_creators.length !== 0){
+
+                        // console.log('INIT action creators', ac);
                         this.action = action_collection(
-                            combine_creators(action_creators),
+                            ActionCreator.combine_creators(...action_creators),
                             Renderer.dispatcher(this.store)
                         );
                     }
@@ -78,7 +89,44 @@ export class Renderer {
         };
     }
 
-    static debug_redraw_choice(component_transducer){
+    static subscriber(provider){
+        return (next) => ({ store = null, viewset = null }) => {
+            const next_component = next({ store, viewset });
+
+            const { oninit = null } = next_component;
+
+            return {
+                ...next_component,
+                'oninit': function(vnode){
+                    this.provider = provider;
+                    if(oninit !== null) oninit.call(this, vnode);
+                }
+            };
+        };
+    }
+
+    static stateful(next){
+        return ({ store = null, viewset = null }) => {
+            const next_component = next({ store, viewset });
+            if(store === null) return next_component;
+
+            const { oninit = null } = next_component;
+
+            return {
+                ...next_component,
+                'oninit': function(vnode){
+                    this.store = store instanceof Store
+                        ? store
+                        : new Store({ store });
+
+                    this.viewset = viewset;
+                    if(oninit !== null) oninit.call(this, vnode);
+                }
+            };
+        };
+    }
+
+    static debug_redraw(component_transducer){
         return (next) => ({ store, viewset = null }) => {
             const next_component = component_transducer(next)({ store, viewset });
 
@@ -102,7 +150,7 @@ export class Renderer {
         };
     }
 
-    static skip_redraw_component(next){
+    static skip_redraw(next){
         return ({ store, viewset = null }) => {
             const next_component = next({ store, viewset });
 
@@ -125,7 +173,7 @@ export class Renderer {
         };
     }
 
-    static state_aware_component(next){
+    static state_aware(next){
         return ({ store, viewset }) => {
             const next_component = next({ store, viewset });
 

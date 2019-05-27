@@ -22,7 +22,7 @@ class View {}
                 [
                     m(
                         'h1',
-                        'App ! (' + store_state.resource + ') #' + store_state.id + ' number ' + store_state.number,
+                        'App ! (' + store_state.resource + ' / viewset ' + viewset + ') #' + store_state.id + ' number ' + store_state.number,
                         [
                             m('button', {'onclick': action.attach}, 'ATTACH'),
                             m('button', {'onclick': action.attach_hello}, 'ATTACH HELLO'),
@@ -34,6 +34,8 @@ class View {}
                     ),
                     m(
                         'ul',
+                        //@NOTICE if you use viewset, you have to propagate it through anchors
+                        //If you dont, children will fallback to default
                         m(provider.AnchorGroup, {store, provider, viewset, wrapper: 'li'})
                     )
                 ]
@@ -69,7 +71,7 @@ class View {}
                         'h1',
                         'Alternate hello ! (' + store_state.resource + ') #' + store_state.id + ' number ' + store_state.number,
                         Object.keys(action).map(
-                            (key) => m('button', {key, 'onclick': action[key]}, 'DYNAMIC ' + key.toUpperCase())
+                            (key) => m('button', {key, 'onclick': action[key]}, key)
                         )
                     ),
                     m(
