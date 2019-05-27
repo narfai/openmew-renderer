@@ -62,7 +62,7 @@ const app_state = {
     const { logger, debug } = Utility;
     const { detach, attach } = Structural;
 
-    //@NOTUCE[2] you can attach as much state transducers you want to a resource, anytime, order matter ...
+    //@NOTICE[2] you can attach as much state transducers you want to a resource, anytime, order matter ...
     provider.connect_transducers([
         logger,
         debug(detach, 'DETACH REDUCER'), //@NOTICE you easily can debug the I/O of a state transducer with debug
