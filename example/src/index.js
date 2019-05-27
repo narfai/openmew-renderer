@@ -35,7 +35,9 @@ const app_state = {
 };
 
 (function(
-    { Provider, Renderer, Middleware, Identity, Structural, Utility, Functional, ActionCreator },
+    // @NOTICE Only the provider is really required
+    // Other dependencies are exposed for extended use or convenience purpose
+    { Provider, Renderer, Middleware, Structural, Utility, Functional, ActionCreator },
     { createStore, applyMiddleware },
     m,
     View,
@@ -61,7 +63,7 @@ const app_state = {
     );
 
     const { logger, debug } = Utility;
-    const { detach, attach } = Structural;
+    const { detach, append, prepend } = Structural;
 
     // @NOTICE you can attach as much state transducers you want to a resource, anytime, order matter ...
     provider.connect_state_transducers(
@@ -69,7 +71,8 @@ const app_state = {
         logger,
         // @NOTICE you easily can debug the I/O of a state transducer with debug wrapper
         debug(detach, 'DETACH REDUCER'),
-        attach,
+        append,
+        prepend,
         Behavior.increment_transducer
     );
 

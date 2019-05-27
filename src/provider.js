@@ -29,14 +29,14 @@ export class Provider {
         // Stateful components
 
         this[component_reducer] = (/*{ query_store, viewset = null }*/) => ({ 'view': () => mithril('h1', 'Resource not found') });
-        this[controller_reducer] = (forward) => this[component_reducer](forward);
+        this[controller_reducer] = (...forward) => this[component_reducer](...forward);
 
         const create_component = Functional.pipe(
             Renderer.subscriber(this),
             Renderer.stateful
         )(({ store, viewset }) => this[controller_reducer]({ store, viewset }));
 
-        this.component = ({ store, viewset }) => create_component({ store, viewset });
+        this.component = (...forward) => create_component(...forward);
 
 
         // Stateless
