@@ -70,6 +70,11 @@ Structural.append = attach(
     ]
 );
 
+Structural.replace = (type, children_reducer) => attach(
+    type,
+    (state, action) => children_reducer(state, action)
+);
+
 Structural.detach = Identity.state_reducer((next, state = null, action = {}) =>
     ((next_state) => {
             return (
