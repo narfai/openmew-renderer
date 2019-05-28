@@ -16,7 +16,7 @@ class View {}
         //NOTICE: transducers use mithril state to give capabilities
         //store / provider / action comes from controller builtin tranducer
         //store_state comes from optional state_aware_component tranducer
-        'view': ({state: { store, provider, action = {}, store_state, viewset }}) =>
+        'view': ({state: { store, provider, action = {}, store_state, viewset, AnchorGroup }}) =>
             m(
                 'div',
                 [
@@ -31,16 +31,16 @@ class View {}
                     ),
                     m(
                         'ul',
-                        //@NOTICE if you use viewset, you have to propagate it through anchors
-                        //If you dont, children will fallback to default
-                        m(provider.AnchorGroup, {store, provider, viewset, wrapper: 'li'})
+                        // @Notice force all children to use alternate resource
+                        // m(AnchorGroup, { wrapper: 'li', 'viewset_override': 'Alternate' })
+                        m(AnchorGroup, { wrapper: 'li' })
                     )
                 ]
             )
     };
 
     View.hello_view = {
-        'view': ({state: {store, provider, action, store_state, viewset }}) =>
+        'view': ({state: {store, provider, action, store_state, AnchorGroup }}) =>
             m(
                 'div',
                 [
@@ -53,14 +53,14 @@ class View {}
                     ),
                     m(
                         'ul',
-                        m(provider.AnchorGroup, {store, provider, viewset, wrapper: 'li'})
+                        m(AnchorGroup, { wrapper: 'li'})
                     )
                 ]
             )
     };
 
     View.hello_alternate_view = {
-        'view': ({state: { store, provider, action, store_state, viewset }}) =>
+        'view': ({state: { store, action, store_state, AnchorGroup }}) =>
             m(
                 'div',
                 [
@@ -73,7 +73,7 @@ class View {}
                     ),
                     m(
                         'ul',
-                        m(provider.AnchorGroup, {store, provider, viewset, wrapper: 'li'})
+                        m(AnchorGroup, { wrapper: 'li'})
                     )
                 ]
             )

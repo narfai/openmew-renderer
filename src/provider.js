@@ -32,17 +32,10 @@ export class Provider {
         this[controller_reducer] = (...forward) => this[component_reducer](...forward);
 
         const create_component = Functional.pipe(
-            Renderer.subscriber(this),
-            Renderer.stateful
+            Renderer.stateful_recursible_subscriber(this, mithril),
         )(({ store, viewset }) => this[controller_reducer]({ store, viewset }));
 
         this.component = (...forward) => create_component(...forward);
-
-
-        // Stateless
-
-        this.Anchor = Component.anchor(mithril);
-        this.AnchorGroup = Component.anchor_group(mithril);
     }
 
     connect_component(resource, component_resource, ...action_creators){

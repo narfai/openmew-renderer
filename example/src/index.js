@@ -137,6 +137,9 @@ const app_state = {
 
     // @NOTICE Then switch manually viewset to display added resource
     // store.dispatch(ActionCreator.switch({ 'viewset': 'Alternate' }));
+    // You have to render anyway since there could be some viewset_overrides
+    // which using the new resource partially
+    store.dispatch(ActionCreator.switch());
 
     store.subscribe(() => {
         console.log('state', store.getState());
