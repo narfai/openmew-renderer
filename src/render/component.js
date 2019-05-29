@@ -13,13 +13,8 @@ export class Component {
                 this[component] = this.provider.component({ store, viewset });
             },
             'view': ({ state, attrs: { consumer_args = {} } }) => mithril(
-                'div',
-                [
-                    mithril(
-                        state[component],
-                        { 'from_anchor': consumer_args }
-                    )
-                ]
+                state[component],
+                { 'from_anchor': consumer_args }
             )
         });
     }
@@ -34,12 +29,10 @@ export class Component {
                             ? mithril(
                                 wrapper,
                                 {'key': id},
-                                [
-                                    mithril(
-                                        state.Anchor,
-                                        { id, viewset_override, consumer_args }
-                                    )
-                                ]
+                                mithril(
+                                    state.Anchor,
+                                    { id, viewset_override, consumer_args }
+                                )
                             )
                             : mithril(
                                 state.Anchor,
