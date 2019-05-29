@@ -12,11 +12,12 @@ export class Component {
 
                 this[component] = this.provider.component({ store, viewset });
             },
-            'view': ({ state }) => mithril(
+            'view': ({ state, attrs: { consumer_args = {} } }) => mithril(
                 'div',
                 [
                     mithril(
-                        state[component]
+                        state[component],
+                        { 'from_anchor': consumer_args }
                     )
                 ]
             )
@@ -25,7 +26,7 @@ export class Component {
 
     static anchor_group(mithril){
         return {
-            'view': ({state, 'attrs': {filterFn = () => true, wrapper = null, viewset_override = false }}) =>
+            'view': ({state, 'attrs': {filterFn = () => true, wrapper = null, viewset_override = false, consumer_args = {} }}) =>
                 state.store.getState().children
                     .filter((child_state) => filterFn(child_state))
                     .map(
@@ -36,13 +37,13 @@ export class Component {
                                 [
                                     mithril(
                                         state.Anchor,
-                                        { id, viewset_override }
+                                        { id, viewset_override, consumer_args }
                                     )
                                 ]
                             )
                             : mithril(
                                 state.Anchor,
-                                {'key': id, id, viewset_override }
+                                {'key': id, id, viewset_override, consumer_args }
                             )
                     )
         };

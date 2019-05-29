@@ -8,7 +8,7 @@
  */
 
 import { Identity } from './identity';
-import { APPEND_MODULE, PREPREND_MODULE, DETACH_MODULE } from '../action/creator';
+import { ActionCreator } from '../action/creator';
 
 export class Structural {}
 //@NOTICE Propagate endorse both roles of recursive Enumerator and Accumulator
@@ -41,7 +41,7 @@ Structural.propagate = Identity.state_reducer(function propagate_reducer(next, s
     };
 });
 
-const attach = (type, children_reducer) => Identity.state_reducer(
+Structural.attach = (type, children_reducer) => Identity.state_reducer(
     (next, state = null, action = {}) =>
         ((next_state) => (
                 action.type === type
@@ -54,31 +54,26 @@ const attach = (type, children_reducer) => Identity.state_reducer(
         )(next(state, action))
 );
 
-Structural.prepend = attach(
-    PREPREND_MODULE,
+Structural.prepend = Structural.attach(
+    ActionCreator.PREPREND_MODULE,
     (state, action) => [
         Identity.module(action.resource, action.initial_state),
         ...state.children
     ]
 );
 
-Structural.append = attach(
-    APPEND_MODULE,
+Structural.append = Structural.attach(
+    ActionCreator.APPEND_MODULE,
     (state, action) => [
         ...state.children,
         Identity.module(action.resource, action.initial_state)
     ]
 );
 
-Structural.replace = (type, children_reducer) => attach(
-    type,
-    (state, action) => children_reducer(state, action)
-);
-
 Structural.detach = Identity.state_reducer((next, state = null, action = {}) =>
     ((next_state) => {
             return (
-                action.type === DETACH_MODULE
+                action.type === ActionCreator.DETACH_MODULE
                     ? {
                         ...next_state,
                         'children': next_state.children.filter(({ id }) => id !== action.id)

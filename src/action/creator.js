@@ -16,7 +16,6 @@ export const PREPREND_MODULE = 'PREPREND_MODULE';
 export const DETACH_MODULE = 'DETACH_MODULE';
 export const SWITCH_VIEWSET = 'SWITCH_VIEWSET';
 
-
 const action_creator_identity = (/*state*/) => ({/*action*/});
 
 function spread(action_creator = action_creator_identity){
@@ -99,6 +98,11 @@ export class ActionCreator {
         ;
     }
 }
+
+ActionCreator.APPEND_MODULE = 'APPEND_MODULE';
+ActionCreator.PREPREND_MODULE = 'PREPREND_MODULE';
+ActionCreator.DETACH_MODULE = 'DETACH_MODULE';
+ActionCreator.SWITCH_VIEWSET = 'SWITCH_VIEWSET';
 
 spread.append = ActionCreator.spreadable(ActionCreator.append);
 spread.prepend = ActionCreator.spreadable(ActionCreator.prepend);

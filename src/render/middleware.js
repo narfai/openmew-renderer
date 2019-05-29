@@ -8,7 +8,7 @@
  */
 
 import { Store } from '../state';
-import { SWITCH_VIEWSET } from '../action/creator';
+import { ActionCreator } from '../action/creator';
 
 export class Middleware {
     static redraw(mithril){
@@ -19,7 +19,7 @@ export class Middleware {
         };
     }
 
-    static render(mithril, provider, root_element, allowed = [SWITCH_VIEWSET]){
+    static render(mithril, provider, root_element, allowed = [ActionCreator.SWITCH_VIEWSET]){
         return (store) => (next) => (action) => {
             if(!allowed.includes(action.type)) return next(action);
             const virtual_store = new Store({ store, select: action.select });
