@@ -55,7 +55,7 @@ Structural.attach = (type, children_reducer) => Identity.state_reducer(
 );
 
 Structural.prepend = Structural.attach(
-    ActionCreator.PREPREND_MODULE,
+    ActionCreator.PREPEND,
     (state, action) => [
         Identity.module(action.resource, action.initial_state),
         ...state.children

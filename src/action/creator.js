@@ -12,7 +12,7 @@ import { Scope } from './scope';
 import { ActionTransducer } from './transducer';
 
 export const APPEND_MODULE = 'APPEND_MODULE';
-export const PREPREND_MODULE = 'PREPREND_MODULE';
+export const PREPEND_MODULE = 'PREPEND_MODULE';
 export const DETACH_MODULE = 'DETACH_MODULE';
 export const SWITCH_VIEWSET = 'SWITCH_VIEWSET';
 
@@ -49,7 +49,7 @@ export class ActionCreator {
 
     static prepend({ resource, initial_state = {} }){
         return {
-            'type': PREPREND_MODULE,
+            'type': PREPEND_MODULE,
             resource,
             initial_state
         };
@@ -100,7 +100,7 @@ export class ActionCreator {
 }
 
 ActionCreator.APPEND_MODULE = 'APPEND_MODULE';
-ActionCreator.PREPREND_MODULE = 'PREPREND_MODULE';
+ActionCreator.PREPEND = 'PREPEND_MODULE';
 ActionCreator.DETACH_MODULE = 'DETACH_MODULE';
 ActionCreator.SWITCH_VIEWSET = 'SWITCH_VIEWSET';
 
