@@ -8,7 +8,7 @@
  */
 
 import describe from 'ospec';
-import { Allow } from '../allow';
+import { Allow } from './allow';
 const assert = describe;
 
 describe('allow', () => {
@@ -48,7 +48,7 @@ describe('allow', () => {
     assert(Allow.self_resource(mock.parent)(mock.child.getState())).equals(false);
 });
 
-import { ActionCreator } from '../creator';
+import { ActionCreator } from './creator';
 
 describe('creator', () => {
     const mock = {

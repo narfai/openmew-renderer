@@ -11,7 +11,7 @@ import ospec from 'ospec';
 global.window = require("mithril/test-utils/browserMock.js")();
 global.document = window.document;
 
-import './action/test';
+import './action/action.test';
 
 ospec.run();
 /** As Library consumer, i can render my application from store state real-time, recursively **/

@@ -14,7 +14,7 @@ var node_test = {
     'mode': 'development',
     'target': 'node',
     'devtool': 'inline-source-map',
-    'entry': { 'app': './src/test.js' },
+    'entry': { 'app': './src/src.test.js' },
     'resolve': { 'alias': { 'openmew-renderer': path.resolve(__dirname, 'src') } },
     'module': {
         'rules': [
