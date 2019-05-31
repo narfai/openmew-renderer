@@ -10,7 +10,7 @@
 
 import { Store } from '../state';
 import { Functional } from '../functional';
-import { ActionCreator } from '../action/creator';
+import { ActionCreator } from '../action';
 
 import { DEFAULT_VIEWSET, resource_identity } from './identity';
 import { Component } from './component';

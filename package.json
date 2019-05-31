@@ -8,23 +8,37 @@
   "license": "MPL-2.0",
   "devDependencies": {
     "@babel/core": "^7.4.4",
+    "ava": "^1.4.1",
     "babel-eslint": "^10.0.1",
     "babel-loader": "^8.0.6",
+    "browser-env": "^3.2.6",
     "eslint": "^5.16.0",
-    "ospec": "^3.1.0",
     "uniqid": "^5.0.3",
     "webpack": "^4.32.0",
     "webpack-cli": "^3.3.2"
   },
   "scripts": {
     "prepublish": "yarn build",
-    "watch": "webpack-cli --watch --config=./webpack.conf.js",
+    "watch:lib": "webpack-cli --watch --config=./webpack.conf.js",
     "build": "webpack-cli --config=./webpack.conf.js --display-error-details --verbose",
     "build-test": "webpack-cli --config=./webpack.test.conf.js --display-error-details --verbose",
     "lint": "eslint src",
-    "test": "yarn build-test && node ./dist/openmew-renderer-node.test.js"
+    "test": "yarn build && ava -v --color",
+    "watch:test": "ava --watch"
   },
   "dependencies": {
     "mithril": "^2.0.0-rc.5"
+  },
+  "ava": {
+    "files": [
+      "src/**/*.test.js"
+    ],
+    "cache": true,
+    "concurrency": 5,
+    "failFast": true,
+    "failWithoutAssertions": false,
+    "require": [
+      "./src/_setup-browser-env.js"
+    ]
   }
 }

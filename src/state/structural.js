@@ -8,7 +8,7 @@
  */
 
 import { Identity } from './identity';
-import { ActionCreator } from '../action/creator';
+import { ActionCreator } from '../action';
 
 export class Structural {}
 //@NOTICE Propagate endorse both roles of recursive Enumerator and Accumulator

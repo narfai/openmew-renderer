@@ -7,7 +7,7 @@
  *
  */
 import { Identity, Structural } from './state';
-import { Renderer, Component } from './render';
+import { Renderer } from './render';
 import { Functional } from './functional';
 
 const chain_reducer = Symbol('chain_reducer');
@@ -28,7 +28,10 @@ export class Provider {
 
         // Stateful components
 
-        this[component_reducer] = (/*{ query_store, viewset = null }*/) => ({ 'view': () => mithril('h1', 'Resource not found') });
+        this[component_reducer] = (/*{ query_store, viewset = null }*/) => ({
+            'view': () => mithril('h1', 'Resource not found')
+        });
+        
         this[controller_reducer] = (...forward) => this[component_reducer](...forward);
 
         const create_component = Functional.pipe(

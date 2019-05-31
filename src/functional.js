@@ -21,24 +21,24 @@ export class Functional {
     }
 
     static asserter(){
-        const stats = {
-            'success': 0,
-            'failed': 0
-        };
 
-        function assert(a, message = assert.format(a, ' is true')){
-            if(a === true){
-                stats.success += 1;
-                return;
-            }
-            stats.failed += 1;
-            throw new Error('Fail to assert that ' + message);
-        }
-        assert.format = (...args) => JSON.stringify([...args]);
-        assert.equals = (a, b) => assert(a === b, assert.format(a, ' equals to ', b));
-        assert.not_equals = (a, b) => assert(a !== b, assert.format(a, ' not equals to ', b));
-        assert.stats = () => stats;
-
-        return assert;
     }
 }
+
+const stats = {
+    'success': 0,
+    'failed': 0
+};
+
+Functional.assert = function assert(a, message = assert.format(a, ' is true')){
+    if(a === true){
+        stats.success += 1;
+        return;
+    }
+    stats.failed += 1;
+    throw new Error('Fail to assert that ' + message);
+};
+Functional.assert.format = (...args) => JSON.stringify([...args]);
+Functional.assert.equals = (a, b) => Functional.assert(a === b, Functional.assert.format(a, ' equals to ', b));
+Functional.assert.not_equals = (a, b) => Functional.assert(a !== b, Functional.assert.format(a, ' not equals to ', b));
+Functional.assert.stats = () => stats;
