@@ -7,6 +7,7 @@
  *
  */
 
+/** GIVEN ... **/
 const stub = {
     'action': {
         'custom': {

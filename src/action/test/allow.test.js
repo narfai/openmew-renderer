@@ -12,30 +12,30 @@ import describe from 'ava';
 import { Allow } from '../../../dist/openmew-renderer';
 import stub from './stub';
 
-describe('Allow action - none assert always returns false', (t) => {
+describe('Action assertion - none assert always returns false', (t) => {
     t.false(Allow.none()());
 });
 
-describe('Allow action - self assert match self store', (t) => {
+describe('Action assertion - self assert match self store', (t) => {
     t.true(Allow.self(stub.store.parent)(stub.store.parent.getState()));
 });
 
-describe('Allow action - root assert match root store', (t) => {
+describe('Action assertion - root assert match root store', (t) => {
     t.true(Allow.root(stub.store.parent)());
 });
 
-describe('Allow action - parent assert match parent state & store', (t) => {
+describe('Action assertion - parent assert match parent state & store', (t) => {
     t.true(Allow.parent(stub.store.child)(stub.store.parent.getState()));
 });
 
-describe('Allow action - chain assert parent state is in chain of child store', (t) => {
+describe('Action assertion - chain assert parent state is in chain of child store', (t) => {
     t.true(Allow.chain(stub.store.child)(stub.store.parent.getState()));
 });
 
-describe('Allow action - resource assert child state is MockChild', (t) => {
+describe('Action assertion - resource assert child state is MockChild', (t) => {
     t.true(Allow.resource('MockChild')(stub.store.child.getState()));
 });
 
-describe('Allow action - self_ressource assert child state is not same resource of parent store', (t) => {
+describe('Action assertion - self_ressource assert child state is not same resource of parent store', (t) => {
     t.false(Allow.self_resource(stub.store.parent)(stub.store.child.getState()));
 });

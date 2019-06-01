@@ -24,11 +24,11 @@ describe.before((t) => {
     );
 });
 
-describe('Create actions - Action collection got correct keys', (t) => {
+describe('Action creation - Action collection got user-defined keys', (t) => {
     t.deepEqual(Object.keys(t.context.collection), ['append', 'prepend', 'detach', 'test_action']);
 });
 
-describe('Create actions - Append built-in generates append action', (t) => {
+describe('Action creation - Append built-in generates append action', (t) => {
     t.deepEqual(t.context.collection.append(), {
         'type': ActionCreator.APPEND_MODULE,
         'resource': 'MockChild',
@@ -36,7 +36,7 @@ describe('Create actions - Append built-in generates append action', (t) => {
     });
 });
 
-describe('Create actions - Prepend built-in generates prepend action', (t) => {
+describe('Action creation - Prepend built-in generates prepend action', (t) => {
     t.deepEqual(t.context.collection.prepend(), {
         'type': ActionCreator.PREPEND,
         'resource': 'MockChild',
@@ -44,14 +44,14 @@ describe('Create actions - Prepend built-in generates prepend action', (t) => {
     });
 });
 
-describe('Create actions - Detach built-in generates detach action', (t) => {
+describe('Action creation - Detach built-in generates detach action', (t) => {
     t.deepEqual(t.context.collection.detach(), {
         'type': ActionCreator.DETACH_MODULE,
         'id': 'jwcloezc'
     });
 });
 
-describe('Create actions - Custom action generates user-defined action', (t) => {
+describe('Action creation - Custom action generates user-defined action', (t) => {
     t.deepEqual(t.context.collection.test_action(), {
         'type': 'TEST_ACTION',
         'content': 'TEST CONTENT'
