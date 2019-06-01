@@ -27,22 +27,26 @@ const stub = {
     },
     'store': {
         'parent': {
-            'resource': 'MockParent',
             'id': 'jw3r0qza',
+            'resource': 'MockParent',
             'chain': ['jw3r0qza'],
             'getState': () => ({
                 'id': 'jw3r0qza',
-                'resource': 'MockParent'
+                'resource': 'MockParent',
+                'children': [
+                    {
+                        'id': 'jwcloezc',
+                        'resource': 'MockChild',
+                        'children': []
+                    }
+                ]
             })
         },
         'child': {
             'id': 'jwcloezc',
             'resource': 'MockChild',
             'chain': ['jw3r0qza', 'jwcloezc'],
-            'getState': () => ({
-                'id': 'jwcloezc',
-                'resource': 'MockChild'
-            })
+            'getState': () => stub.store.parent.getState().children[0]
         }
     }
 };
