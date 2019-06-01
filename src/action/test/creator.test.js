@@ -9,7 +9,7 @@
 
 import describe from 'ava';
 import { ActionCreator } from '../../../dist/openmew-renderer';
-import stub from './stub';
+import stub from '../../stub';
 
 describe.before((t) => {
     const state_dispatcher = /*(store) => */ (creator) => (/*event*/) => creator(/*store*/)(/*event*/);

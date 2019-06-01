@@ -9,7 +9,7 @@
 
 import describe from 'ava';
 import { Scope, Identity, Functional } from '../../../dist/openmew-renderer';
-import stub from './stub';
+import stub from '../../stub';
 
 const action_reducer_identity = (action) => action;
 

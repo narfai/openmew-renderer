@@ -9,7 +9,7 @@
 
 import describe from 'ava';
 import { Allow } from '../../../dist/openmew-renderer';
-import stub from './stub';
+import stub from '../../stub';
 
 describe('Action assertion - none assert always returns false', (t) => {
     t.false(Allow.none()());

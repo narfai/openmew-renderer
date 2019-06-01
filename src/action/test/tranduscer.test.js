@@ -9,11 +9,11 @@
 
 import describe from 'ava';
 import { ActionTransducer, Identity, Functional } from '../../../dist/openmew-renderer';
-import stub from './stub';
+import stub from '../../stub';
 
 const action_reducer_identity = (action) => action;
 
-describe('Reduce transducer allow action to be reduced thus preserve custom data without mutation', (t) => {
+describe('Reduce action transducer allow action to be reduced thus preserve custom data without mutation', (t) => {
     const allowed_to_reduce = ActionTransducer.reduce(() => true)(action_reducer_identity)(stub.action.custom);
 
     t.true(Identity.allow_reduction({/*any state*/}, allowed_to_reduce));
@@ -24,7 +24,7 @@ describe('Reduce transducer allow action to be reduced thus preserve custom data
     });
 });
 
-describe('Propagate transducer allow action to be propagated thus preserve custom data without mutation', (t) => {
+describe('Propagate action transducer allow action to be propagated thus preserve custom data without mutation', (t) => {
     const allowed_to_propagate = ActionTransducer.propagate(() => true)(action_reducer_identity)(stub.action.custom);
 
     t.true(Identity.allow_propagation({/*any state*/}, allowed_to_propagate));
@@ -35,7 +35,7 @@ describe('Propagate transducer allow action to be propagated thus preserve custo
     });
 });
 
-describe('Redraw transducer allow action to trigger redraw thus preserve custom data without mutation', (t) => {
+describe('Redraw action transducer allow action to trigger redraw thus preserve custom data without mutation', (t) => {
     const allowed_to_redraw = ActionTransducer.redraw(() => true)(action_reducer_identity)(stub.action.custom);
 
     t.not(allowed_to_redraw, stub.action.custom);
@@ -45,7 +45,7 @@ describe('Redraw transducer allow action to trigger redraw thus preserve custom 
     });
 });
 
-describe('Redraw, reduce & propagate are composable thus preserve custom data without mutation', (t) => {
+describe('Redraw, reduce & propagate action transducers are composable thus preserve custom data without mutation', (t) => {
     const allowed_to_propagate_reduce_redraw = Functional.pipe(
         ActionTransducer.propagate(() => true),
         ActionTransducer.reduce(() => true),
