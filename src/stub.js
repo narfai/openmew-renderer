@@ -8,6 +8,19 @@
  */
 
 /** GIVEN ... **/
+
+const state = {
+    'id': 'jw3r0qza',
+    'resource': 'MockParent',
+    'children': [
+        {
+            'id': 'jwcloezc',
+            'resource': 'MockChild',
+            'children': []
+        }
+    ]
+};
+
 const stub = {
     'action': {
         'custom': {
@@ -30,17 +43,7 @@ const stub = {
             'id': 'jw3r0qza',
             'resource': 'MockParent',
             'chain': ['jw3r0qza'],
-            'getState': () => ({
-                'id': 'jw3r0qza',
-                'resource': 'MockParent',
-                'children': [
-                    {
-                        'id': 'jwcloezc',
-                        'resource': 'MockChild',
-                        'children': []
-                    }
-                ]
-            })
+            'getState': () => state
         },
         'child': {
             'id': 'jwcloezc',
