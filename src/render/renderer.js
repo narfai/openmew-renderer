@@ -96,11 +96,11 @@ export class Renderer {
 
     /** Generic **/
 
-    static stateful_recursible_subscriber(provider, mithril){
+    static stateful_recursible_subscriber(provider, recursible){
         return (next) => Functional.pipe(
             Renderer.subscriber(provider),
             Renderer.stateful,
-            Renderer.recursible(provider, mithril)
+            Renderer.recursible(provider, recursible)
         )(next);
     }
 
@@ -140,7 +140,7 @@ export class Renderer {
         };
     }
 
-    static recursible(provider, mithril){
+    static recursible(provider, { Anchor, AnchorGroup }){
         return (next) => ({ store, viewset = null }) => {
             const next_component = next({ store, viewset });
             const { oninit = null } = next_component;
@@ -149,12 +149,12 @@ export class Renderer {
                 ...next_component,
                 'oninit': function(vnode){
                     if(oninit !== null) oninit.call(this, vnode);
-                    this.Anchor = Renderer.stateful_recursible_subscriber(provider, mithril)(
-                        () => Component.anchor(mithril)
+                    this.Anchor = Renderer.stateful_recursible_subscriber(provider, { Anchor, AnchorGroup })(
+                        () => Anchor
                     )({ store, viewset });
 
-                    this.AnchorGroup = Renderer.stateful_recursible_subscriber(provider, mithril)(
-                        () => Component.anchor_group(mithril)
+                    this.AnchorGroup = Renderer.stateful_recursible_subscriber(provider, { Anchor, AnchorGroup })(
+                        () => AnchorGroup
                     )({ store, viewset });
                 }
             };
