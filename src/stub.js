@@ -49,7 +49,7 @@ const stub = {
             'id': 'jwcloezc',
             'resource': 'MockChild',
             'chain': ['jw3r0qza', 'jwcloezc'],
-            'getState': () => stub.store.parent.getState().children[0]
+            'getState': () => state.children[0]
         }
     }
 };

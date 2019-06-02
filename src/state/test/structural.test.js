@@ -12,7 +12,6 @@ import { Structural, ActionCreator } from '../../../dist/openmew-renderer';
 import stub from '../../stub';
 
 const state_reducer_identity = (state, action) => state;
-const action_reducer_identity = (action) => action;
 
 describe('Append trans-reducer actually append new child', (t) => {
     const parent_state = stub.store.parent.getState();
@@ -82,17 +81,17 @@ describe('Propagate trans-reducer actually propagate an action from parent to ch
 });
 
 describe('Propagate trans-reducer disallow child reduction thus keep child reference', (t) => {
-    const is_parent = (state) => state.resource === 'MockParent';
     const parent_state = stub.store.parent.getState();
+    const is_parent = (state) => state.resource === 'MockParent';
     const propagated_reducer = (state, action) => action.type === stub.action.custom.type ? { ...state, marker: true } : state;
-    const custom_action = {
-        ...stub.action.custom,
-        'reduce': is_parent,
-        'propagate': is_parent
-    };
+
     const propagated_state = Structural.propagate(propagated_reducer)(
         parent_state,
-        custom_action
+        {
+            ...stub.action.custom,
+            'reduce': is_parent,
+            'propagate': is_parent
+        }
     );
 
     t.not(parent_state, propagated_state);
@@ -105,5 +104,4 @@ describe('Propagate trans-reducer disallow child reduction thus keep child refer
     const child_state = stub.store.child.getState();
 
     t.is(child_state, propagated_state.children[0]);
-    t.deepEqual(child_state, propagated_state.children[0]);
 });
