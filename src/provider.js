@@ -16,7 +16,7 @@ const controller_reducer = Symbol('controller_reducer');
 const recursible_component = Symbol('recursible_component');
 
 export class Provider {
-    constructor(mithril, initial_resource, initial_state = {}){
+    constructor(mithril, initial_resource, default_state = {}, not_found_creator = null){
         this[recursible_component] = {
             'Anchor': Component.anchor(mithril),
             'AnchorGroup': Component.anchor_group(mithril)
@@ -29,15 +29,17 @@ export class Provider {
             (state, action) => this[chain_reducer](state, action)
         );
         this.reducer = (
-            state = Identity.module(initial_resource, initial_state), action
+            state = Identity.module(initial_resource, default_state),
+            action
         ) => propagate_reducer(state, action);
 
 
         // Stateful components
 
-        this[component_reducer] = (/*{ query_store, viewset = null }*/) => ({
-            'view': () => mithril('h1', 'Resource not found') //TODO render ResourceNotFound component
-        });
+        this[component_reducer] = (forward) => (
+            typeof not_found_creator === 'function'
+                && not_found_creator(forward)
+        ) || Component.not_found(mithril);
 
         this[controller_reducer] = (...forward) => this[component_reducer](...forward);
 

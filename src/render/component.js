@@ -41,4 +41,10 @@ export class Component {
                     )
         };
     }
+
+    static not_found(mithril){
+        return {
+            'view': () => mithril('h1', 'Resource not found')
+        };
+    }
 }
