@@ -177,9 +177,9 @@ export class Renderer {
                         ? onbeforeupdate.call(this, vnode, old_vnode)
                         : true;
 
-                    console.log('redraw evaluation ?', choice);
-                    console.log('old vnode', old_vnode);
-                    console.log('new vnode', vnode);
+                    console.debug('redraw evaluation ?', choice);
+                    console.debug('old vnode', old_vnode);
+                    console.debug('new vnode', vnode);
                     console.groupEnd();
                     return choice;
                 }
