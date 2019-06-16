@@ -3,7 +3,7 @@ import { Store } from '../state';
 export class Component {
     static anchor(mithril){
         const component = Symbol('component');
-        return ({
+        return {
             'oninit': function({ 'attrs': { id, viewset_override = false } }){
                 const store = Store.child_store(id, this.store);
                 const viewset = viewset_override === false
@@ -16,12 +16,12 @@ export class Component {
                 state[component],
                 { 'from_anchor': consumer_args }
             )
-        });
+        };
     }
 
     static anchor_group(mithril){
         return {
-            'view': ({state, 'attrs': {filterFn = () => true, wrapper = null, viewset_override = false, consumer_args = {} }}) =>
+            'view': ({state, 'attrs': { filterFn = () => true, wrapper = null, viewset_override = false, consumer_args = {} }}) =>
                 state.store.getState().children
                     .filter((child_state) => filterFn(child_state))
                     .map(
@@ -39,6 +39,12 @@ export class Component {
                                 {'key': id, id, viewset_override, consumer_args }
                             )
                     )
+        };
+    }
+
+    static not_found(mithril){
+        return {
+            'view': () => mithril('h1', 'Resource not found')
         };
     }
 }

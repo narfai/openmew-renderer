@@ -26,7 +26,9 @@ OpenMew library which allow to render Mithril/Redux based components recursively
 
 * lint : check lint with eslint
 
-* watch : watch for changes & build ( must be used in live source mode)
+* watch:lib : watch for changes & build library ( must be used in live source mode)
+
+* watch:test: watch "*.test.js" changes & run tests
 
 * shell : run bash shell
 
