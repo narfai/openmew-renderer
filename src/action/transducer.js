@@ -14,8 +14,8 @@ export class ActionTransducer {
                 ...next_action,
                 'propagate':
                     (state) => typeof next_action.propagate === 'undefined'
-                        ? allow_propagate(state)
-                        : next_action.propagate(state) || allow_propagate(state)
+                        ? allow_propagate(state, action)
+                        : next_action.propagate(state, action) || allow_propagate(state, action)
             })
         )(next(action));
     }
@@ -26,8 +26,8 @@ export class ActionTransducer {
                 ...next_action,
                 'reduce':
                     (state) => typeof next_action.reduce === 'undefined'
-                        ? allow_reduce(state)
-                        : next_action.reduce(state) || allow_reduce(state)
+                        ? allow_reduce(state, action)
+                        : next_action.reduce(state, action) || allow_reduce(state, action)
             })
         )(next(action));
     }
@@ -36,7 +36,7 @@ export class ActionTransducer {
         return (next) => (action) => (
             (next_action) => ({
                 ...next_action,
-                'redraw': allow_redraw()
+                'redraw': allow_redraw(action)
             })
         )(next(action));
     }
