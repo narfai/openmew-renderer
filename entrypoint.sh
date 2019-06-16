@@ -47,9 +47,13 @@ case "$1" in
         user_yarn "install --production=false"
         user_yarn "lint"
         ;;
-    watch)
+    "watch:lib")
         user_yarn "install --production=false"
-        user_yarn "watch"
+        user_yarn "watch:lib"
+        ;;
+    "watch:test")
+        user_yarn "install --production=false"
+        user_yarn "watch:test"
         ;;
     build|"")
         user_yarn "install --production=false"

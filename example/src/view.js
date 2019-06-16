@@ -33,7 +33,7 @@ class View {}
                         'ul',
                         // @Notice force all children to use alternate resource
                         // m(AnchorGroup, { wrapper: 'li', 'viewset_override': 'Alternate' })
-                        // m(AnchorGroup, { wrapper: 'li' })
+                        m(AnchorGroup, { wrapper: 'li' })
                     )
                 ]
             )

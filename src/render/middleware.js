@@ -8,7 +8,7 @@
  */
 
 import { Store } from '../state';
-import { ActionCreator } from '../action/creator';
+import { ActionCreator } from '../action';
 
 export class Middleware {
     static redraw(mithril){

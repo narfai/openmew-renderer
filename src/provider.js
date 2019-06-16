@@ -13,8 +13,15 @@ import { Functional } from './functional';
 const chain_reducer = Symbol('chain_reducer');
 const component_reducer = Symbol('component_reducer');
 const controller_reducer = Symbol('controller_reducer');
+const recursible_component = Symbol('recursible_component');
+
 export class Provider {
-    constructor(mithril, initial_resource, initial_state = {}){
+    constructor(mithril, initial_resource, default_state = {}, not_found_creator = null){
+        this[recursible_component] = {
+            'Anchor': Component.anchor(mithril),
+            'AnchorGroup': Component.anchor_group(mithril)
+        };
+
         // State
 
         this[chain_reducer] = (state) => state;
@@ -22,17 +29,22 @@ export class Provider {
             (state, action) => this[chain_reducer](state, action)
         );
         this.reducer = (
-            state = Identity.module(initial_resource, initial_state), action
+            state = Identity.module(initial_resource, default_state),
+            action
         ) => propagate_reducer(state, action);
 
 
         // Stateful components
 
-        this[component_reducer] = (/*{ query_store, viewset = null }*/) => ({ 'view': () => mithril('h1', 'Resource not found') });
+        this[component_reducer] = (forward) => (
+            typeof not_found_creator === 'function'
+                && not_found_creator(forward)
+        ) || Component.not_found(mithril);
+
         this[controller_reducer] = (...forward) => this[component_reducer](...forward);
 
         const create_component = Functional.pipe(
-            Renderer.stateful_recursible_subscriber(this, mithril),
+            Renderer.stateful_recursible_subscriber(this, this[recursible_component]),
         )(({ store, viewset }) => this[controller_reducer]({ store, viewset }));
 
         this.component = (...forward) => create_component(...forward);

@@ -14,14 +14,14 @@ export class Utility {
   static debug(transducer, name = ''){
       return Identity.state_reducer((next, state = null, action = {}) => {
           console.groupCollapsed(name + ' against ' + action.type);
-          console.log('dispatching', action);
-          console.log('state', state);
+          console.debug('dispatching', action);
+          console.debug('state', state);
           const next_state = transducer(next)(state, action);
-          console.log('next_state', state);
-          console.log('propagate to', state.children.filter(
+          console.debug('next_state', state);
+          console.debug('propagate to', state.children.filter(
               (subState) => Identity.allow_propagation(subState, action) === true
           ).map(({ id }) => id));
-          console.log('reduction allowed', Identity.allow_reduction(state, action));
+          console.debug('reduction allowed', Identity.allow_reduction(state, action));
           console.groupEnd();
 
           return next_state;
