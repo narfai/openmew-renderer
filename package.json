@@ -18,6 +18,7 @@
     "webpack-cli": "^3.3.2"
   },
   "scripts": {
+    "install": "yarn build",
     "prepublish": "yarn build",
     "watch:lib": "webpack-cli --watch --config=./webpack.conf.js",
     "build": "webpack-cli --config=./webpack.conf.js --display-error-details --verbose",
