@@ -7,7 +7,7 @@
   "author": "Francois Cadeillan <francois@azsystem.fr>",
   "license": "WTFPL",
   "devDependencies": {
-    "mithril": "^1.1.6",
+    "mithril": "^1.1.7",
     "redux": "^4.0.1"
   }
 }
